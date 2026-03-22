@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RBI & SSC CGL Study Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a0f; --surface:#13131a; --surface2:#1c1c28; --border:#2a2a3d;
+  --accent:#f0c040; --accent2:#7c6af5; --accent3:#3dd9b3; --accent4:#f06060;
+  --text:#e8e8f0; --muted:#6b6b8a;
+  --english:#f06060; --quant:#f0c040; --reasoning:#3dd9b3; --ga:#7c6af5; --computer:#f08040;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(124,106,245,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,106,245,0.04) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none;z-index:0;}
+.container{max-width:1100px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+
+header{padding:44px 0 28px;border-bottom:1px solid var(--border);margin-bottom:36px;}
+.exam-tags{display:flex;gap:8px;margin-bottom:12px;}
+.tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:2px;}
+.tag-rbi{background:rgba(240,192,64,.12);color:var(--accent);border:1px solid rgba(240,192,64,.3);}
+.tag-ssc{background:rgba(124,106,245,.12);color:var(--accent2);border:1px solid rgba(124,106,245,.3);}
+h1{font-family:'Playfair Display',serif;font-size:clamp(26px,5vw,46px);font-weight:900;line-height:1.1;letter-spacing:-1px;}
+h1 span{color:var(--accent);}
+.subtitle{color:var(--muted);font-size:13px;margin-top:8px;}
+.header-row{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;}
+.level-badge{background:var(--surface2);border:1px solid var(--border);padding:8px 16px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent3);}
+
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:36px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);padding:18px;border-radius:6px;position:relative;overflow:hidden;transition:border-color .2s;}
+.stat-card:hover{border-color:var(--accent2);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.y::before{background:var(--accent);}.stat-card.p::before{background:var(--accent2);}
+.stat-card.g::before{background:var(--accent3);}.stat-card.r::before{background:var(--accent4);}
+.stat-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;}
+.stat-value{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;margin-top:4px;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+.tabs{display:flex;gap:0;margin-bottom:30px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.tab-btn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:10px 16px;background:none;border:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-btn:hover:not(.active){color:var(--text);}
+.tab-panel{display:none;}.tab-panel.active{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.section-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:8px;}
+.section-title span{color:var(--accent);}
+.section-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+.ldot{width:8px;height:8px;border-radius:50%;}
+
+.week-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:36px;}
+.day-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:transform .2s,border-color .2s;}
+.day-card:hover{transform:translateY(-2px);border-color:var(--accent2);}
+.day-header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;background:var(--surface2);border-bottom:1px solid var(--border);}
+.day-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
+.day-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 8px;border-radius:2px;}
+.bf{background:rgba(124,106,245,.15);color:var(--accent2);border:1px solid rgba(124,106,245,.3);}
+.bm{background:rgba(240,192,64,.15);color:var(--accent);border:1px solid rgba(240,192,64,.3);}
+.br{background:rgba(61,217,179,.15);color:var(--accent3);border:1px solid rgba(61,217,179,.3);}
+.day-body{padding:12px 16px;}
+.session{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--border);}
+.session:last-child{border-bottom:none;}
+.sdot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.en{background:var(--english);}.qu{background:var(--quant);}.re{background:var(--reasoning);}
+.ga{background:var(--ga);}.cp{background:var(--computer);}.mk{background:var(--accent);}.rv{background:var(--muted);}
+.session-info{flex:1;}
+.s-subj{font-size:13px;font-weight:600;}
+.s-detail{font-size:11px;color:var(--muted);margin-top:1px;}
+.s-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;background:var(--surface2);padding:2px 7px;border-radius:2px;align-self:flex-start;margin-top:3px;}
+
+.tracker-form{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:24px;margin-bottom:24px;}
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:14px;}
+label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;display:block;margin-bottom:5px;}
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 13px;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent2);}
+select option{background:var(--surface2);}
+.slider-wrap{display:flex;align-items:center;gap:12px;}
+input[type=range]{flex:1;padding:0;background:transparent;border:none;accent-color:var(--accent2);}
+.slider-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--accent);min-width:36px;text-align:right;}
+.btn{background:var(--accent2);color:#fff;border:none;padding:11px 26px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:opacity .2s,transform .1s;}
+.btn:hover{opacity:.85;}.btn:active{transform:scale(.98);}
+.btn-r{background:var(--accent4);}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+
+.log-list{display:flex;flex-direction:column;gap:10px;}
+.log-entry{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px 18px;display:flex;align-items:center;gap:14px;animation:slideIn .3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.log-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.log-main{flex:1;}
+.log-subject{font-weight:600;font-size:13px;}
+.log-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.log-right{text-align:right;flex-shrink:0;}
+.log-score{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;}
+.s-hi{color:var(--accent3);}.s-mid{color:var(--accent);}.s-lo{color:var(--accent4);}
+.log-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.log-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;transition:color .2s;}
+.log-del:hover{color:var(--accent4);}
+.empty-state{text-align:center;padding:44px 20px;color:var(--muted);border:1px dashed var(--border);border-radius:6px;font-size:13px;}
+
+.analysis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-bottom:30px;}
+.a-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:22px;}
+.a-card h3{font-family:'Playfair Display',serif;font-size:15px;margin-bottom:16px;}
+.bar-row{margin-bottom:12px;}
+.bar-top{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px;}
+.bar-pct{font-family:'DM Mono',monospace;color:var(--muted);}
+.bar-track{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width .7s ease;}
+.insight-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--border);font-size:12px;align-items:flex-start;}
+.insight-item:last-child{border-bottom:none;}
+.insight-icon{font-size:14px;flex-shrink:0;}
+.insight-text{color:var(--muted);line-height:1.5;}
+.insight-text strong{color:var(--text);}
+
+.streak-wrap{margin-top:12px;}
+.streak-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:10px;}
+.streak-grid{display:flex;flex-wrap:wrap;gap:5px;}
+.s-day{width:26px;height:26px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:8px;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s;}
+.s-day.done{background:rgba(61,217,179,.18);border-color:var(--accent3);color:var(--accent3);}
+.s-day.today{border-color:var(--accent);color:var(--accent);}
+.s-day:hover{border-color:var(--accent2);}
+
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+.tip-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid;border-radius:6px;padding:18px;}
+.tip-card.tc-y{border-left-color:var(--accent);}.tip-card.tc-p{border-left-color:var(--accent2);}
+.tip-card.tc-g{border-left-color:var(--accent3);}.tip-card.tc-r{border-left-color:var(--accent4);}
+.tip-icon{font-size:18px;margin-bottom:8px;}
+.tip-title{font-weight:700;font-size:13px;margin-bottom:6px;}
+.tip-text{font-size:12px;color:var(--muted);line-height:1.65;}
+
+.syllabus-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;}
+.syl-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:visible;min-width:0;}
+.syl-header{padding:12px 16px;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.syl-body{padding:10px 16px 14px;}
+.topic{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--border);font-size:12px;cursor:pointer;min-width:0;}
+.topic:last-child{border-bottom:none;}
+.topic input[type=checkbox]{accent-color:var(--accent2);cursor:pointer;flex-shrink:0;width:14px;height:14px;}
+.topic-label{flex:1;min-width:0;white-space:normal;word-break:break-word;line-height:1.4;}
+.topic.checked .topic-label{text-decoration:line-through;color:var(--muted);}
+.pbadge{margin-left:8px;font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:2px;letter-spacing:1px;flex-shrink:0;white-space:nowrap;}
+.ph{background:rgba(240,96,96,.15);color:var(--accent4);border:1px solid rgba(240,96,96,.3);}
+.pm{background:rgba(240,192,64,.15);color:var(--accent);border:1px solid rgba(240,192,64,.3);}
+.pl{background:rgba(61,217,179,.15);color:var(--accent3);border:1px solid rgba(61,217,179,.3);}
+
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+@media(max-width:600px){.log-entry{flex-wrap:wrap;}.tab-btn{padding:8px 10px;font-size:9px;}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="header-row">
+    <div>
+      <div class="exam-tags">
+        <span class="tag tag-rbi">RBI Assistant 2026</span>
+        <span class="tag tag-ssc">SSC CGL 2026</span>
+      </div>
+      <h1>Your <span>Study</span> Command Centre</h1>
+      <p class="subtitle">Intermediate level &nbsp;·&nbsp; 4–5 hrs/day &nbsp;·&nbsp; Priority: English · Quant · General Awareness</p>
+    </div>
+    <div class="level-badge">⚡ Intermediate · 4–5 hrs/day</div>
+  </div>
+</header>
+
+<div class="stats-row">
+  <div class="stat-card y"><div class="stat-label">Days Studied</div><div class="stat-value" id="statDays">0</div><div class="stat-sub">Logged sessions</div></div>
+  <div class="stat-card p"><div class="stat-label">Avg Accuracy</div><div class="stat-value" id="statAcc">—</div><div class="stat-sub">All subjects</div></div>
+  <div class="stat-card g"><div class="stat-label">Topics Done</div><div class="stat-value" id="statTopics">0</div><div class="stat-sub">Syllabus checklist</div></div>
+  <div class="stat-card r"><div class="stat-label">Weakest Area</div><div class="stat-value" id="statWeak" style="font-size:16px;margin-top:8px;">—</div><div class="stat-sub">By accuracy</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('plan',this)">📅 Weekly Plan</button>
+  <button class="tab-btn" onclick="switchTab('tracker',this)">📊 Daily Tracker</button>
+  <button class="tab-btn" onclick="switchTab('analysis',this)">🔍 Analysis</button>
+  <button class="tab-btn" onclick="switchTab('syllabus',this)">📚 Syllabus</button>
+  <button class="tab-btn" onclick="switchTab('tips',this)">💡 Strategy</button>
+</div>
+
+<!-- PLAN TAB -->
+<div class="tab-panel active" id="tab-plan">
+  <div class="section-title">7-Day <span>Study Schedule</span></div>
+  <p class="section-sub">4–5 hrs/day · Each session 45–60 min · 10 min break between sessions · Adjust topics based on your mock test results</p>
+  <div class="legend">
+    <div class="legend-item"><div class="ldot" style="background:var(--english)"></div>English</div>
+    <div class="legend-item"><div class="ldot" style="background:var(--quant)"></div>Quantitative Aptitude</div>
+    <div class="legend-item"><div class="ldot" style="background:var(--reasoning)"></div>Reasoning</div>
+    <div class="legend-item"><div class="ldot" style="background:var(--ga)"></div>General Awareness / Banking</div>
+    <div class="legend-item"><div class="ldot" style="background:var(--computer)"></div>Computer Knowledge</div>
+    <div class="legend-item"><div class="ldot" style="background:var(--accent)"></div>Mock / PYQs</div>
+  </div>
+  <div class="week-grid">
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Monday</div><span class="day-badge bf">Focus Day</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot en"></div><div class="session-info"><div class="s-subj">English – Reading Comprehension</div><div class="s-detail">2 passages + vocab in context</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot qu"></div><div class="session-info"><div class="s-subj">Quant – Number System</div><div class="s-detail">LCM, HCF, divisibility rules, 30 Qs</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot ga"></div><div class="session-info"><div class="s-subj">GA – Banking Awareness</div><div class="s-detail">RBI structure, monetary policy, repo rate</div></div><div class="s-time">55 min</div></div>
+        <div class="session"><div class="sdot en"></div><div class="session-info"><div class="s-subj">English – Error Spotting</div><div class="s-detail">25 sentence correction Qs timed</div></div><div class="s-time">45 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Evening Revision</div><div class="s-detail">Flashcards: vocab + banking terms</div></div><div class="s-time">25 min</div></div>
+      </div>
+    </div>
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Tuesday</div><span class="day-badge bf">Focus Day</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot qu"></div><div class="session-info"><div class="s-subj">Quant – Percentage & Profit/Loss</div><div class="s-detail">Concept + 30 practice questions</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot re"></div><div class="session-info"><div class="s-subj">Reasoning – Syllogism & Inequalities</div><div class="s-detail">Venn diagrams + 25 coded inequalities</div></div><div class="s-time">55 min</div></div>
+        <div class="session"><div class="sdot en"></div><div class="session-info"><div class="s-subj">English – Cloze Test</div><div class="s-detail">5 full cloze passages, timed 8 min each</div></div><div class="s-time">50 min</div></div>
+        <div class="session"><div class="sdot ga"></div><div class="session-info"><div class="s-subj">GA – Static GK</div><div class="s-detail">Countries, capitals, currencies, HQs of banks</div></div><div class="s-time">45 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Evening Revision</div><div class="s-detail">Quant formulas recap + 10 flashcards</div></div><div class="s-time">25 min</div></div>
+      </div>
+    </div>
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Wednesday</div><span class="day-badge bf">Focus Day</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot re"></div><div class="session-info"><div class="s-subj">Reasoning – Puzzles & Seating Arrangement</div><div class="s-detail">3 linear + 2 circular arrangement sets</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot qu"></div><div class="session-info"><div class="s-subj">Quant – Ratio, Proportion & Mixtures</div><div class="s-detail">Partnership + alligation problems</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot ga"></div><div class="session-info"><div class="s-subj">GA – Current Affairs</div><div class="s-detail">Last 3 months: economy, appointments, awards</div></div><div class="s-time">55 min</div></div>
+        <div class="session"><div class="sdot cp"></div><div class="session-info"><div class="s-subj">Computer Knowledge (RBI)</div><div class="s-detail">MS Office, internet, networking basics</div></div><div class="s-time">45 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Evening Revision</div><div class="s-detail">Reasoning tricks + patterns recap</div></div><div class="s-time">25 min</div></div>
+      </div>
+    </div>
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Thursday</div><span class="day-badge bf">Focus Day</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot en"></div><div class="session-info"><div class="s-subj">English – Para-jumbles & Fill Blanks</div><div class="s-detail">20 para-jumbles + 25 fill in the blanks</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot qu"></div><div class="session-info"><div class="s-subj">Quant – Time, Speed & Distance</div><div class="s-detail">Trains, boats & streams, relative speed</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot ga"></div><div class="session-info"><div class="s-subj">GA – Banking: SEBI, NABARD, NPA</div><div class="s-detail">Regulatory bodies + Basel norms overview</div></div><div class="s-time">50 min</div></div>
+        <div class="session"><div class="sdot re"></div><div class="session-info"><div class="s-subj">Reasoning – Blood Relations & Directions</div><div class="s-detail">20 Qs each type, timed 15 min each</div></div><div class="s-time">45 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Evening Revision</div><div class="s-detail">Grammar rules: tenses, prepositions, articles</div></div><div class="s-time">25 min</div></div>
+      </div>
+    </div>
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Friday</div><span class="day-badge bf">Focus Day</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot qu"></div><div class="session-info"><div class="s-subj">Quant – SI & CI / Ages</div><div class="s-detail">Formula mastery + 25 tricky problems</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot en"></div><div class="session-info"><div class="s-subj">English – Synonyms, Antonyms & Idioms</div><div class="s-detail">50 words + 20 idioms/phrases</div></div><div class="s-time">50 min</div></div>
+        <div class="session"><div class="sdot ga"></div><div class="session-info"><div class="s-subj">GA – India Economy & Government Schemes</div><div class="s-detail">PM schemes, budget highlights, summits</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot re"></div><div class="session-info"><div class="s-subj">Reasoning – Coding-Decoding</div><div class="s-detail">Old pattern + new pattern coding Qs</div></div><div class="s-time">45 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Evening Revision</div><div class="s-detail">GA notes: schemes + RBI Governor data</div></div><div class="s-time">25 min</div></div>
+      </div>
+    </div>
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Saturday</div><span class="day-badge bm">Mock Test Day</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot mk"></div><div class="session-info"><div class="s-subj">Full Mock Test</div><div class="s-detail">RBI Assistant or SSC CGL pattern — strictly timed</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot mk"></div><div class="session-info"><div class="s-subj">Sectional Test – English</div><div class="s-detail">35 Qs in 20 min — max speed drill</div></div><div class="s-time">35 min</div></div>
+        <div class="session"><div class="sdot mk"></div><div class="session-info"><div class="s-subj">Sectional Test – Quant</div><div class="s-detail">35 Qs in 20 min — max speed drill</div></div><div class="s-time">35 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Deep Error Analysis</div><div class="s-detail">Review every wrong answer — log patterns in notebook</div></div><div class="s-time">70 min</div></div>
+        <div class="session"><div class="sdot ga"></div><div class="session-info"><div class="s-subj">GA – Weekly Current Affairs Quiz</div><div class="s-detail">Self-test: 50 rapid-fire GK questions</div></div><div class="s-time">30 min</div></div>
+      </div>
+    </div>
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Sunday</div><span class="day-badge br">Revision Day</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Quant – Week Revision</div><div class="s-detail">Formula sheet + 25 mixed chapter problems</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">English – Week Revision</div><div class="s-detail">Vocab list + grammar rules recap + RC</div></div><div class="s-time">50 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">GA & Banking – Week Revision</div><div class="s-detail">Notes review + 50-Q rapid fire quiz</div></div><div class="s-time">50 min</div></div>
+        <div class="session"><div class="sdot mk"></div><div class="session-info"><div class="s-subj">PYQs Practice</div><div class="s-detail">RBI / SSC CGL last 3 years questions</div></div><div class="s-time">55 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Plan Next Week</div><div class="s-detail">Review weak areas, update tracker, set goals</div></div><div class="s-time">15 min</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Phase-wise <span>Roadmap</span></div>
+  <div class="tips-grid" style="margin-bottom:30px;">
+    <div class="tip-card tc-y"><div class="tip-icon">📖</div><div class="tip-title">Phase 1 — Foundation (Weeks 1–4)</div><div class="tip-text">Cover all concepts: Number system, percentages, grammar fundamentals, syllogism, banking basics. Build a personal formula sheet. Do 15–20 practice Qs per topic before moving on.</div></div>
+    <div class="tip-card tc-p"><div class="tip-icon">🎯</div><div class="tip-title">Phase 2 — Practice (Weeks 5–10)</div><div class="tip-text">Speed + accuracy drills. 1 sectional test/day. Current affairs daily. Focus on Time & Work, DI, Error Spotting, Puzzles. Target 80%+ sectional accuracy and sub-25 sec/Q speed.</div></div>
+    <div class="tip-card tc-g"><div class="tip-icon">🚀</div><div class="tip-title">Phase 3 — Mock & Revision (Weeks 11+)</div><div class="tip-text">2 full mocks/week. Deep error analysis after each mock. Revise GA notes daily (15 min). PYQs from last 5 years. Cut weak topics to minimum viable coverage and maximise strengths.</div></div>
+  </div>
+</div>
+
+<!-- TRACKER TAB -->
+<div class="tab-panel" id="tab-tracker">
+  <div class="section-title">Daily <span>Progress Log</span></div>
+  <p class="section-sub">Log each study session to track accuracy, time spent, and confidence.</p>
+  <div class="tracker-form">
+    <div class="form-row">
+      <div><label>Date</label><input type="date" id="logDate"></div>
+      <div><label>Subject</label>
+        <select id="logSubject">
+          <option value="English">English</option>
+          <option value="Quantitative Aptitude">Quantitative Aptitude</option>
+          <option value="Reasoning">Reasoning</option>
+          <option value="General Awareness">General Awareness / Banking</option>
+          <option value="Computer Knowledge">Computer Knowledge</option>
+          <option value="Mock Test">Mock Test</option>
+        </select>
+      </div>
+      <div><label>Topic Covered</label><input type="text" id="logTopic" placeholder="e.g. Reading Comprehension"></div>
+    </div>
+    <div class="form-row">
+      <div><label>Questions Attempted</label><input type="number" id="logAttempted" min="0" placeholder="e.g. 30"></div>
+      <div><label>Questions Correct</label><input type="number" id="logCorrect" min="0" placeholder="e.g. 22"></div>
+      <div><label>Time Spent (min)</label><input type="number" id="logTime" min="0" placeholder="e.g. 55"></div>
+    </div>
+    <div class="form-row">
+      <div style="grid-column:1/-1;">
+        <label>Confidence Level: <span id="confLabel">3 / 5</span></label>
+        <div class="slider-wrap">
+          <input type="range" id="logConf" min="1" max="5" value="3" oninput="document.getElementById('confLabel').textContent=this.value+' / 5';document.getElementById('confVal').textContent=this.value;">
+          <div class="slider-val" id="confVal">3</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div style="grid-column:1/-1;"><label>Notes / Doubts</label><textarea id="logNotes" rows="2" placeholder="Key formulas learned, topics to revisit, doubts..."></textarea></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="addLog()">+ Log Session</button>
+      <button class="btn btn-r" onclick="clearLogs()">Clear All</button>
+    </div>
+  </div>
+  <div id="logContainer"><div class="empty-state">📝 No sessions logged yet.<br>Add your first study session above to start tracking!</div></div>
+
+  <div style="margin-top:30px;">
+    <div class="section-title">Study <span>Streak</span></div>
+    <div class="streak-wrap">
+      <div class="streak-label" id="streakLabel">Loading...</div>
+      <div class="streak-grid" id="streakGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYSIS TAB -->
+<div class="tab-panel" id="tab-analysis">
+  <div class="section-title">Performance <span>Analysis</span></div>
+  <p class="section-sub">Auto-updated from your daily logs.</p>
+  <div class="analysis-grid">
+    <div class="a-card"><h3>📊 Accuracy by Subject</h3><div id="accuracyBars"><div style="color:var(--muted);font-size:12px;">Log sessions to see accuracy data.</div></div></div>
+    <div class="a-card"><h3>⏱ Time Invested (mins)</h3><div id="timeBars"><div style="color:var(--muted);font-size:12px;">Log sessions to see time data.</div></div></div>
+    <div class="a-card"><h3>💡 Smart Insights</h3><div id="insights">
+      <div class="insight-item"><div class="insight-icon">📌</div><div class="insight-text">Log at least <strong>3 sessions</strong> to unlock personalised insights.</div></div>
+      <div class="insight-item"><div class="insight-icon">🎯</div><div class="insight-text">Target: <strong>80%+ accuracy</strong> in Reasoning, 70%+ in English &amp; Quant.</div></div>
+      <div class="insight-item"><div class="insight-icon">⚠️</div><div class="insight-text">Your <strong>priority subjects</strong>: English, Quant, GA — spend 65% of time here.</div></div>
+    </div></div>
+    <div class="a-card"><h3>📅 Recent Sessions</h3><div id="weekSessions"><div style="color:var(--muted);font-size:12px;">No sessions logged yet.</div></div></div>
+  </div>
+</div>
+
+<!-- SYLLABUS TAB -->
+<div class="tab-panel" id="tab-syllabus">
+  <div class="section-title">Syllabus <span>Checklist</span></div>
+  <p class="section-sub">Tick topics as you complete them. Data saves in your browser automatically.</p>
+  <div class="syllabus-grid" id="syllabusGrid"></div>
+</div>
+
+<!-- TIPS TAB -->
+<div class="tab-panel" id="tab-tips">
+  <div class="section-title">Exam <span>Strategy</span> & Study Tips</div>
+  <div class="tips-grid">
+    <div class="tip-card tc-r"><div class="tip-icon">📕</div><div class="tip-title">English — Priority #1 (Weak Area)</div><div class="tip-text">Learn 10 vocab words daily using the word-root method. Attempt 1 RC passage every morning. Master error spotting through grammar rules — not gut feel. Use Arihant English + The Hindu editorials daily.</div></div>
+    <div class="tip-card tc-y"><div class="tip-icon">🔢</div><div class="tip-title">Quant — Priority #2 (Weak Area)</div><div class="tip-text">Build a chapter-wise formula sheet from day 1. Solve 25–30 Qs per topic before moving on. For RBI: focus on Percentages, SI/CI, Time-Work, DI. For SSC CGL add Geometry, Trigonometry, and Algebra.</div></div>
+    <div class="tip-card tc-p"><div class="tip-icon">🏦</div><div class="tip-title">GA / Banking — Priority #3 (Weak Area)</div><div class="tip-text">Read one economy/banking news daily (PIB, The Hindu). Use GKToday or Oliveboard for daily CA. Make a one-page GA summary every Sunday. Memorise top RBI, SEBI, IRDAI, NABARD data points.</div></div>
+    <div class="tip-card tc-g"><div class="tip-icon">🧩</div><div class="tip-title">Reasoning — Maintain Your Edge</div><div class="tip-text">Reasoning is your scoring safety net — protect it. Do 1 puzzle set daily (10 min). Focus on seating arrangements, syllogism, and inequalities. These are top-frequency in both RBI and SSC CGL.</div></div>
+    <div class="tip-card tc-y"><div class="tip-icon">⏰</div><div class="tip-title">Daily 4–5 Hour Routine</div><div class="tip-text"><strong>7–8am:</strong> English (60 min) · <strong>9–10am:</strong> Quant (60 min) · <strong>11–11:55am:</strong> GA/Banking (55 min) · <strong>2–3pm:</strong> Reasoning (60 min) · <strong>4–4:30pm:</strong> Revision + Vocab (30 min) · <strong>Evening:</strong> CA news (15 min)</div></div>
+    <div class="tip-card tc-p"><div class="tip-icon">⏱</div><div class="tip-title">Exam Time Strategy</div><div class="tip-text">RBI Prelims: 100 Qs in 60 min — 36 sec/Q max. SSC CGL Tier-1: 100 Qs in 60 min. Attempt order: Reasoning → GA → English → Quant. Skip and return. Never spend more than 45 sec on any question.</div></div>
+    <div class="tip-card tc-g"><div class="tip-icon">🧠</div><div class="tip-title">Spaced Repetition & Memory</div><div class="tip-text">Review notes at Day 1 → Day 3 → Day 7 → Day 14. Keep a "mistake journal" from mock tests and re-attempt those Qs every Sunday. Teach concepts aloud — it reveals hidden gaps faster than re-reading.</div></div>
+    <div class="tip-card tc-r"><div class="tip-icon">💻</div><div class="tip-title">Best Free Resources</div><div class="tip-text"><strong>Mocks:</strong> Oliveboard, Testbook, PracticeMock · <strong>CA:</strong> GKToday, Bankersadda · <strong>Quant/Reasoning:</strong> Rakesh Yadav, Adda247 (YouTube) · <strong>English:</strong> The Hindu editorial + Gradeup tests · <strong>GA:</strong> PIB daily digest</div></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const subjectColors={'English':'var(--english)','Quantitative Aptitude':'var(--quant)','Reasoning':'var(--reasoning)','General Awareness':'var(--ga)','Computer Knowledge':'var(--computer)','Mock Test':'var(--accent)'};
+let logs=JSON.parse(localStorage.getItem('rbi_studyLogs')||'[]');
+
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='analysis')renderAnalysis();
+}
+
+document.getElementById('logDate').valueAsDate=new Date();
+
+function addLog(){
+  const date=document.getElementById('logDate').value;
+  const subject=document.getElementById('logSubject').value;
+  const topic=document.getElementById('logTopic').value.trim();
+  const attempted=parseInt(document.getElementById('logAttempted').value)||0;
+  const correct=parseInt(document.getElementById('logCorrect').value)||0;
+  const time=parseInt(document.getElementById('logTime').value)||0;
+  const conf=document.getElementById('logConf').value;
+  const notes=document.getElementById('logNotes').value.trim();
+  if(!date||!subject||!topic){alert('Please fill Date, Subject, and Topic.');return;}
+  logs.unshift({date,subject,topic,attempted,correct,time,conf,notes,id:Date.now()});
+  localStorage.setItem('rbi_studyLogs',JSON.stringify(logs));
+  renderLogs();updateStats();
+  document.getElementById('logTopic').value='';
+  document.getElementById('logAttempted').value='';
+  document.getElementById('logCorrect').value='';
+  document.getElementById('logTime').value='';
+  document.getElementById('logNotes').value='';
+}
+
+function deleteLog(id){logs=logs.filter(l=>l.id!==id);localStorage.setItem('rbi_studyLogs',JSON.stringify(logs));renderLogs();updateStats();}
+function clearLogs(){if(!confirm('Clear all logs?'))return;logs=[];localStorage.setItem('rbi_studyLogs','[]');renderLogs();updateStats();}
+
+function getC(pct){return pct>=75?'s-hi':pct>=55?'s-mid':'s-lo';}
+
+function renderLogs(){
+  const c=document.getElementById('logContainer');
+  if(!logs.length){c.innerHTML='<div class="empty-state">📝 No sessions logged yet.<br>Add your first study session above to start tracking!</div>';return;}
+  let h='<div class="log-list">';
+  logs.forEach(l=>{
+    const pct=l.attempted>0?Math.round(l.correct/l.attempted*100):0;
+    const col=subjectColors[l.subject]||'var(--muted)';
+    h+=`<div class="log-entry">
+      <div class="log-dot" style="background:${col}"></div>
+      <div class="log-main">
+        <div class="log-subject">${l.subject}</div>
+        <div class="log-meta">${l.topic} &nbsp;·&nbsp; ${l.date} &nbsp;·&nbsp; Conf: ${'⭐'.repeat(parseInt(l.conf))}${l.notes?' &nbsp;·&nbsp; '+l.notes.substring(0,40)+'…':''}</div>
+      </div>
+      <div class="log-right">
+        <div class="log-score ${getC(pct)}">${l.attempted>0?pct+'%':'—'}</div>
+        <div class="log-time">${l.correct}/${l.attempted} correct &nbsp;|&nbsp; ${l.time} min</div>
+      </div>
+      <button class="log-del" onclick="deleteLog(${l.id})">✕</button>
+    </div>`;
+  });
+  h+='</div>';c.innerHTML=h;
+}
+
+function updateStats(){
+  const days=new Set(logs.map(l=>l.date)).size;
+  document.getElementById('statDays').textContent=days;
+  const wq=logs.filter(l=>l.attempted>0);
+  if(wq.length){const a=Math.round(wq.reduce((s,l)=>s+(l.correct/l.attempted*100),0)/wq.length);document.getElementById('statAcc').textContent=a+'%';}
+  else document.getElementById('statAcc').textContent='—';
+  document.getElementById('statTopics').textContent=document.querySelectorAll('.topic.checked').length;
+  const bs={};
+  wq.forEach(l=>{if(!bs[l.subject])bs[l.subject]={c:0,a:0};bs[l.subject].c+=l.correct;bs[l.subject].a+=l.attempted;});
+  let w='—',mp=101;
+  Object.entries(bs).forEach(([s,v])=>{const p=v.c/v.a*100;if(p<mp){mp=p;w=s.split(' ')[0];}});
+  document.getElementById('statWeak').textContent=w;
+}
+
+function renderAnalysis(){
+  const subjects=['English','Quantitative Aptitude','Reasoning','General Awareness','Computer Knowledge','Mock Test'];
+  const colors=[subjectColors['English'],subjectColors['Quantitative Aptitude'],subjectColors['Reasoning'],subjectColors['General Awareness'],subjectColors['Computer Knowledge'],subjectColors['Mock Test']];
+  const bs={};subjects.forEach(s=>bs[s]={c:0,a:0,t:0});
+  logs.forEach(l=>{if(bs[l.subject]){bs[l.subject].c+=l.correct;bs[l.subject].a+=l.attempted;bs[l.subject].t+=l.time;}});
+  const maxT=Math.max(...subjects.map(s=>bs[s].t),1);
+  let accH='',timeH='';
+  subjects.forEach((s,i)=>{
+    const d=bs[s],pct=d.a>0?Math.round(d.c/d.a*100):0,tp=Math.round(d.t/maxT*100),short=s.split(' ')[0];
+    accH+=`<div class="bar-row"><div class="bar-top"><span>${short}</span><span class="bar-pct">${d.a>0?pct+'%':'No data'}</span></div><div class="bar-track"><div class="bar-fill" style="width:${d.a>0?pct:0}%;background:${colors[i]}"></div></div></div>`;
+    timeH+=`<div class="bar-row"><div class="bar-top"><span>${short}</span><span class="bar-pct">${d.t} min</span></div><div class="bar-track"><div class="bar-fill" style="width:${tp}%;background:${colors[i]}"></div></div></div>`;
+  });
+  document.getElementById('accuracyBars').innerHTML=accH||'<div style="color:var(--muted);font-size:12px;">No data yet.</div>';
+  document.getElementById('timeBars').innerHTML=timeH||'<div style="color:var(--muted);font-size:12px;">No data yet.</div>';
+  const wq=logs.filter(l=>l.attempted>0);
+  let iH='';
+  if(wq.length<3){iH='<div class="insight-item"><div class="insight-icon">📌</div><div class="insight-text">Log at least <strong>3 sessions</strong> to unlock insights.</div></div>';}
+  else{
+    let ws='',mp=101,ss='',mx=-1;
+    subjects.forEach(s=>{const d=bs[s];if(d.a>0){const p=d.c/d.a*100;if(p<mp){mp=p;ws=s;}if(p>mx){mx=p;ss=s;}}});
+    const avg=Math.round(wq.reduce((s,l)=>s+(l.correct/l.attempted*100),0)/wq.length);
+    const total=logs.reduce((s,l)=>s+l.time,0);
+    iH=`<div class="insight-item"><div class="insight-icon">⚠️</div><div class="insight-text">Weakest: <strong>${ws}</strong> at ${Math.round(mp)}% — needs urgent focus.</div></div>
+    <div class="insight-item"><div class="insight-icon">🏆</div><div class="insight-text">Strongest: <strong>${ss}</strong> at ${Math.round(mx)}% — maintain it.</div></div>
+    <div class="insight-item"><div class="insight-icon">📈</div><div class="insight-text">Overall accuracy: <strong>${avg}%</strong>. ${avg>=75?'Excellent!':avg>=60?'Good — aim for 75%+.':'Needs work — revise basics.'}</div></div>
+    <div class="insight-item"><div class="insight-icon">⏳</div><div class="insight-text">Total time logged: <strong>${total} min</strong> (${Math.round(total/60*10)/10} hrs) across ${logs.length} sessions.</div></div>`;
+  }
+  document.getElementById('insights').innerHTML=iH;
+  const recent=logs.slice(0,5);
+  let rH=recent.length?'<div class="log-list">':'<div style="color:var(--muted);font-size:12px;">No sessions yet.</div>';
+  recent.forEach(l=>{const pct=l.attempted>0?Math.round(l.correct/l.attempted*100):0;rH+=`<div class="log-entry" style="padding:10px 14px;"><div class="log-dot" style="background:${subjectColors[l.subject]||'var(--muted)'}"></div><div class="log-main"><div class="log-subject" style="font-size:12px;">${l.subject}</div><div class="log-meta">${l.topic} · ${l.date}</div></div><div class="log-right"><div class="log-score ${getC(pct)}" style="font-size:16px;">${l.attempted>0?pct+'%':'—'}</div></div></div>`;});
+  if(recent.length)rH+='</div>';
+  document.getElementById('weekSessions').innerHTML=rH;
+}
+
+function buildStreak(){
+  const now=new Date();
+  const y=now.getFullYear(),m=now.getMonth();
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('streakLabel').textContent=months[m]+' '+y+' — Click to mark days studied';
+  const dim=new Date(y,m+1,0).getDate(),today=now.getDate();
+  const streak=JSON.parse(localStorage.getItem('rbi_streak')||'[]');
+  let h='';
+  for(let d=1;d<=dim;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const done=streak.includes(ds),isTday=d===today;
+    h+=`<div class="s-day${done?' done':''}${isTday?' today':''}" onclick="toggleStreak('${ds}',this)">${d}</div>`;
+  }
+  document.getElementById('streakGrid').innerHTML=h;
+}
+
+function toggleStreak(ds,el){
+  let s=JSON.parse(localStorage.getItem('rbi_streak')||'[]');
+  if(s.includes(ds))s=s.filter(d=>d!==ds);else s.push(ds);
+  localStorage.setItem('rbi_streak',JSON.stringify(s));
+  el.classList.toggle('done');
+}
+
+const SYLLABUS=[
+  {subject:'📘 English',color:'var(--english)',topics:[
+    {t:'Reading Comprehension',p:'ph'},{t:'Error Spotting',p:'ph'},{t:'Cloze Test',p:'ph'},
+    {t:'Sentence Correction',p:'pm'},{t:'Para-jumbles',p:'pm'},{t:'Fill in the Blanks',p:'pm'},
+    {t:'Synonyms & Antonyms',p:'pm'},{t:'Idioms & Phrases',p:'pl'},{t:'One Word Substitution',p:'pl'},
+  ]},
+  {subject:'🔢 Quantitative Aptitude',color:'var(--quant)',topics:[
+    {t:'Number System',p:'ph'},{t:'Percentage',p:'ph'},{t:'Profit & Loss',p:'ph'},
+    {t:'Simple & Compound Interest',p:'ph'},{t:'Time, Work & Wages',p:'ph'},
+    {t:'Time, Speed & Distance',p:'ph'},{t:'Data Interpretation',p:'ph'},
+    {t:'Ratio, Proportion & Mixtures',p:'pm'},{t:'Average & Ages',p:'pm'},
+    {t:'Algebra (SSC)',p:'pm'},{t:'Geometry (SSC)',p:'pm'},{t:'Trigonometry (SSC)',p:'pl'},
+  ]},
+  {subject:'🧩 Reasoning',color:'var(--reasoning)',topics:[
+    {t:'Syllogism',p:'ph'},{t:'Puzzles & Seating Arrangement',p:'ph'},{t:'Inequalities',p:'ph'},
+    {t:'Coding-Decoding',p:'pm'},{t:'Blood Relations',p:'pm'},{t:'Directions & Distance',p:'pm'},
+    {t:'Alphanumeric Series',p:'pm'},{t:'Data Sufficiency',p:'pl'},{t:'Input-Output',p:'pl'},
+  ]},
+  {subject:'🏦 General Awareness / Banking',color:'var(--ga)',topics:[
+    {t:'RBI Structure & Functions',p:'ph'},{t:'Monetary Policy & Tools',p:'ph'},
+    {t:'Types of Banks & Accounts',p:'ph'},{t:'Current Affairs (3 months)',p:'ph'},
+    {t:'SEBI, NABARD, SIDBI',p:'pm'},{t:'NPA & Basel Norms',p:'pm'},
+    {t:'Indian Economy & Budget',p:'pm'},{t:'Static GK: Countries, Capitals',p:'pm'},
+    {t:'Awards, Appointments & Summits',p:'pl'},
+  ]},
+  {subject:'💻 Computer Knowledge (RBI)',color:'var(--computer)',topics:[
+    {t:'Computer Fundamentals',p:'pm'},{t:'MS Office Suite',p:'pm'},
+    {t:'Internet & Networking',p:'pm'},{t:'Database Basics',p:'pl'},{t:'Security & Viruses',p:'pl'},
+  ]},
+];
+
+function buildSyllabus(){
+  const saved=JSON.parse(localStorage.getItem('rbi_syllabus')||'[]');
+  let h='';
+  SYLLABUS.forEach(sec=>{
+    h+=`<div class="syl-card"><div class="syl-header"><span style="width:10px;height:10px;border-radius:50%;background:${sec.color};display:inline-block;flex-shrink:0;"></span>${sec.subject}</div><div class="syl-body">`;
+    sec.topics.forEach(tp=>{
+      const key=sec.subject+'||'+tp.t,chk=saved.includes(key);
+      h+=`<div class="topic${chk?' checked':''}" onclick="toggleTopic('${key}',this)"><input type="checkbox" ${chk?'checked':''} onclick="event.stopPropagation();toggleTopic('${key}',this.closest('.topic'))"><span class="topic-label">${tp.t}</span><span class="pbadge ${tp.p}">${tp.p==='ph'?'HIGH':tp.p==='pm'?'MED':'LOW'}</span></div>`;
+    });
+    h+='</div></div>';
+  });
+  document.getElementById('syllabusGrid').innerHTML=h;
+}
+
+function toggleTopic(key,el){
+  let s=JSON.parse(localStorage.getItem('rbi_syllabus')||'[]');
+  const cb=el.querySelector('input[type=checkbox]');
+  if(s.includes(key)){s=s.filter(k=>k!==key);el.classList.remove('checked');if(cb)cb.checked=false;}
+  else{s.push(key);el.classList.add('checked');if(cb)cb.checked=true;}
+  localStorage.setItem('rbi_syllabus',JSON.stringify(s));
+  updateStats();
+}
+
+renderLogs();updateStats();buildStreak();buildSyllabus();
+</script>
+</body>
+</html>
