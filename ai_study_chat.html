@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study AI Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c10;--surface:#0f1419;--surface2:#161d26;--border:#1e2a36;
+  --accent:#3dd9b3;--accent2:#5b8dee;--accent3:#f0c040;--accent4:#f06060;
+  --text:#ddeeff;--muted:#5a7a9a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(61,217,179,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(91,141,238,.03) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none;}
+
+/* HEADER */
+.header{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;z-index:1;}
+.header-left{display:flex;align-items:center;gap:12px;}
+.bot-icon{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.header-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;}
+.header-title span{color:var(--accent);}
+.header-sub{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.header-status{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.clear-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;letter-spacing:.5px;transition:all .2s;}
+.clear-btn:hover{color:var(--accent4);border-color:var(--accent4);}
+
+/* QUICK TOPICS */
+.quick-bar{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;background:var(--surface2);flex-shrink:0;}
+.q-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.5px;padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.q-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(61,217,179,.06);}
+.q-btn.active-topic{border-color:var(--accent2);color:var(--accent2);background:rgba(91,141,238,.1);}
+
+/* MESSAGES */
+.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:1;}
+.msg{display:flex;gap:10px;align-items:flex-start;animation:msgIn .2s ease;}
+@keyframes msgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse;}
+.avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px;}
+.avatar.bot{background:rgba(61,217,179,.12);border:1px solid rgba(61,217,179,.25);}
+.avatar.user{background:rgba(91,141,238,.12);border:1px solid rgba(91,141,238,.25);}
+.bubble{max-width:82%;padding:11px 14px;border-radius:12px;font-size:13px;line-height:1.7;word-break:break-word;}
+.bubble.bot{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:3px;}
+.bubble.user{background:rgba(91,141,238,.12);border:1px solid rgba(91,141,238,.2);border-bottom-right-radius:3px;text-align:left;}
+
+/* Markdown inside bubble */
+.bubble pre{background:rgba(0,0,0,.4);padding:10px 12px;border-radius:6px;overflow-x:auto;font-size:11.5px;margin:8px 0;font-family:'DM Mono',monospace;white-space:pre-wrap;border:1px solid var(--border);}
+.bubble code{font-family:'DM Mono',monospace;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:3px;font-size:11.5px;color:var(--accent3);}
+.bubble strong{color:var(--accent3);font-weight:600;}
+.bubble em{color:var(--accent);font-style:italic;}
+.bubble ul,.bubble ol{padding-left:18px;margin:6px 0;}
+.bubble li{margin:3px 0;}
+.bubble h3{font-family:'Playfair Display',serif;font-size:14px;color:var(--accent);margin:10px 0 4px;}
+.bubble a{color:var(--accent2);text-decoration:none;}
+.bubble a:hover{text-decoration:underline;}
+.bubble hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
+.msg-time{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;padding:0 2px;}
+.msg-col{display:flex;flex-direction:column;}
+.msg.user .msg-col{align-items:flex-end;}
+
+/* Typing indicator */
+.typing-wrap{display:flex;gap:10px;align-items:center;}
+.typing-dots{display:flex;gap:4px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;border-bottom-left-radius:3px;}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:td 1.2s infinite;}
+.typing-dots span:nth-child(2){animation-delay:.2s;}
+.typing-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes td{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+
+/* INPUT AREA */
+.input-area{padding:12px 16px 16px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;position:relative;z-index:1;}
+.input-row{display:flex;gap:10px;align-items:flex-end;}
+.input-box{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;max-height:120px;min-height:42px;line-height:1.5;transition:border-color .2s;}
+.input-box:focus{border-color:var(--accent2);}
+.input-box::placeholder{color:var(--muted);}
+.send-btn{width:42px;height:42px;border-radius:10px;border:none;background:var(--accent);color:var(--bg);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.send-btn:hover{opacity:.85;transform:scale(1.05);}
+.send-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+.input-hint{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-align:center;margin-top:7px;letter-spacing:.5px;}
+.char-count{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-align:right;margin-top:3px;}
+
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="bot-icon">🤖</div>
+    <div>
+      <div class="header-title">Study <span>AI</span> Assistant</div>
+      <div class="header-sub">DS · ML · SQL · Jobs · RBI · SSC CGL</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="header-status"><div class="status-dot"></div>Online</div>
+    <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
+  </div>
+</div>
+
+<div class="quick-bar">
+  <button class="q-btn" onclick="quickAsk('Explain overfitting vs underfitting with solutions')">Overfitting</button>
+  <button class="q-btn" onclick="quickAsk('Write a SQL query using window functions to find the top 3 salaries per department')">SQL Window Fn</button>
+  <button class="q-btn" onclick="quickAsk('How should I structure my Data Science resume for fresher roles?')">DS Resume</button>
+  <button class="q-btn" onclick="quickAsk('Start a mock ML interview. Ask me questions one by one.')">Mock Interview</button>
+  <button class="q-btn" onclick="quickAsk('Explain the difference between Random Forest and XGBoost')">RF vs XGBoost</button>
+  <button class="q-btn" onclick="quickAsk('Give me a 30-day study plan for RBI Assistant exam')">RBI 30-Day Plan</button>
+  <button class="q-btn" onclick="quickAsk('Write a Python function to clean missing values in a Pandas DataFrame')">Python Help</button>
+  <button class="q-btn" onclick="quickAsk('How do I explain a gap in employment in an interview?')">Employment Gap</button>
+  <button class="q-btn" onclick="quickAsk('Explain CAP theorem with a real-world system design example')">CAP Theorem</button>
+  <button class="q-btn" onclick="quickAsk('What are the most important SSC CGL topics for Tier 1?')">SSC CGL Topics</button>
+  <button class="q-btn" onclick="quickAsk('Explain backpropagation step by step with math')">Backprop</button>
+  <button class="q-btn" onclick="quickAsk('How to cold message a recruiter on LinkedIn for a Data Science role?')">Cold Outreach</button>
+</div>
+
+<div class="messages" id="messages"></div>
+
+<div class="input-area">
+  <div class="input-row">
+    <textarea class="input-box" id="inputBox" placeholder="Ask about DS, ML, SQL, jobs, RBI/SSC prep..." rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"
+      oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMsg()">➤</button>
+  </div>
+  <div class="input-hint">Enter to send &nbsp;·&nbsp; Shift+Enter for new line &nbsp;·&nbsp; Powered by Claude</div>
+</div>
+
+<script>
+let history = [];
+let isTyping = false;
+
+const SYSTEM = `You are a sharp, practical study and career AI assistant. The user is preparing for Data Science/ML/IT jobs AND Indian government competitive exams (RBI Assistant, SSC CGL).
+
+Your areas of expertise:
+**Technical:**
+- Data Science, ML, Deep Learning, NLP — theory, math, and code
+- SQL: queries, joins, window functions, optimization, interview problems
+- Python: OOP, Pandas, NumPy, algorithms, coding patterns
+- System Design: scalability, databases, microservices, LLD & HLD
+- DSA: arrays, graphs, trees, DP, LeetCode-style problems
+
+**Career:**
+- Job application strategy, resume writing, LinkedIn optimization
+- Cold outreach scripts, cover letters, salary negotiation
+- Interview prep and mock Q&A (stay in character as interviewer when asked)
+- Handling employment gaps, switching domains, fresher to industry
+
+**Government Exams (RBI Assistant, SSC CGL):**
+- Quantitative Aptitude: number system, percentages, SI/CI, time-work, DI
+- English: RC, error spotting, cloze test, vocabulary
+- Reasoning: syllogism, puzzles, coding-decoding, seating arrangement
+- General Awareness: current affairs, banking, static GK
+- Exam strategy, time management, mock test analysis
+
+**Style rules:**
+- Be concise and direct — no filler phrases
+- Use bullet points for lists
+- Wrap ALL code in triple backticks with language tag e.g. \`\`\`python
+- Bold key terms using **double asterisks**
+- For mock interviews: stay in interviewer character, ask one question at a time, give feedback after user answers
+- If a math problem: show step-by-step working
+- Never say "Great question!" or similar filler`;
+
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,120)+'px';
+}
+
+function timeNow(){
+  return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+
+function mdToHtml(text){
+  return text
+    .replace(/```(\w*)\n?([\s\S]*?)```/g,(_,lang,code)=>`<pre><code>${escHtml(code.trim())}</code></pre>`)
+    .replace(/`([^`\n]+)`/g,(_,c)=>`<code>${escHtml(c)}</code>`)
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^---$/gm,'<hr>')
+    .replace(/^\s*[-•]\s+(.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/s, s => '<ul>'+s+'</ul>')
+    .replace(/\n{2,}/g,'<br><br>')
+    .replace(/\n/g,'<br>');
+}
+
+function escHtml(t){
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function appendMsg(role, text){
+  const container = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + role;
+  const isBot = role === 'bot';
+  const html = isBot ? mdToHtml(text) : escHtml(text).replace(/\n/g,'<br>');
+  wrap.innerHTML = `
+    <div class="avatar ${role}">${isBot ? '🤖' : '👤'}</div>
+    <div class="msg-col">
+      <div class="bubble ${role}">${html}</div>
+      <div class="msg-time">${timeNow()}</div>
+    </div>`;
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTyping(){
+  const container = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.id = 'typingEl';
+  div.className = 'msg bot';
+  div.innerHTML = `<div class="avatar bot">🤖</div><div class="typing-dots"><span></span><span></span><span></span></div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeTyping(){
+  const el = document.getElementById('typingEl');
+  if(el) el.remove();
+}
+
+function clearChat(){
+  if(!confirm('Clear entire chat history?')) return;
+  history = [];
+  document.getElementById('messages').innerHTML = '';
+  appendWelcome();
+}
+
+function appendWelcome(){
+  appendMsg('bot',
+`**Hey! I'm your Study AI Assistant** 👋
+
+I can help you with:
+- 📊 **Data Science & ML** — concepts, code, math, papers
+- 🗄️ **SQL & Python** — queries, algorithms, debugging
+- 💼 **Job Strategy** — resume, LinkedIn, cold outreach, interviews
+- 🎤 **Mock Interviews** — I'll roleplay as your interviewer
+- 🏦 **Govt Exam Prep** — RBI Assistant, SSC CGL strategy & practice
+
+Use the **quick buttons** above or just ask me anything!`
+  );
+}
+
+async function quickAsk(msg){
+  document.getElementById('inputBox').value = msg;
+  await sendMsg();
+}
+
+async function sendMsg(){
+  if(isTyping) return;
+  const input = document.getElementById('inputBox');
+  const msg = input.value.trim();
+  if(!msg) return;
+
+  input.value = '';
+  input.style.height = '42px';
+  appendMsg('user', msg);
+  history.push({role:'user', content: msg});
+
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  isTyping = true;
+  showTyping();
+
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM,
+        messages: history.slice(-14)
+      })
+    });
+
+    if(!resp.ok){
+      const e = await resp.json().catch(()=>({}));
+      throw new Error(e?.error?.message || 'HTTP ' + resp.status);
+    }
+
+    const data = await resp.json();
+    removeTyping();
+
+    const reply = data.content?.map(b=>b.text||'').filter(Boolean).join('') || '';
+    if(reply){
+      history.push({role:'assistant', content: reply});
+      if(history.length > 26) history = history.slice(-26);
+      appendMsg('bot', reply);
+    } else {
+      appendMsg('bot','⚠️ Empty response received. Please try again.');
+    }
+
+  } catch(err){
+    removeTyping();
+    appendMsg('bot',
+`**Could not reach the AI** ⚠️
+
+**Reason:** ${err.message || 'Unknown error'}
+
+**Why this happens:**
+- This chatbot works when opened inside **Claude.ai** as an artifact
+- Direct browser calls to the Anthropic API are blocked by **CORS** (a browser security rule)
+- Internet connection is **not** the issue
+
+**Solution:** This file is working correctly inside Claude.ai's environment where the API is accessible. If you see this outside Claude.ai, the CORS restriction applies.`
+    );
+  }
+
+  btn.disabled = false;
+  isTyping = false;
+  input.focus();
+}
+
+// init
+appendWelcome();
+document.getElementById('inputBox').focus();
+</script>
+</body>
+</html>

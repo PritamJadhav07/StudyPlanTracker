@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Science & IT Study Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c10;--surface:#0f1419;--surface2:#161d26;--border:#1e2a36;
+  --accent:#3dd9b3;--accent2:#5b8dee;--accent3:#f0c040;--accent4:#f06060;
+  --text:#ddeeff;--muted:#5a7a9a;
+  --python:#3dd9b3;--ml:#5b8dee;--stats:#f0c040;--sql:#f08040;--tools:#c084fc;--project:#f06060;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(61,217,179,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(91,141,238,0.03) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;top:-200px;right:-200px;width:600px;height:600px;
+  background:radial-gradient(circle,rgba(91,141,238,.06) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.container{max-width:1100px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+
+/* NAV */
+.nav-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:10px 0;border-bottom:1px solid var(--border);}
+.nav-link{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;}
+.nav-link:hover{color:var(--accent);}
+.nav-active{color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;}
+.nav-sep{color:var(--border);}
+
+/* HEADER */
+header{padding:36px 0 24px;border-bottom:1px solid var(--border);margin-bottom:32px;}
+.exam-tags{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:2px;}
+.tag-ds{background:rgba(61,217,179,.1);color:var(--accent);border:1px solid rgba(61,217,179,.3);}
+.tag-it{background:rgba(91,141,238,.1);color:var(--accent2);border:1px solid rgba(91,141,238,.3);}
+.tag-ml{background:rgba(240,192,64,.1);color:var(--accent3);border:1px solid rgba(240,192,64,.3);}
+h1{font-family:'Playfair Display',serif;font-size:clamp(24px,5vw,44px);font-weight:900;line-height:1.1;letter-spacing:-1px;}
+h1 span{color:var(--accent);}
+.subtitle{color:var(--muted);font-size:13px;margin-top:8px;}
+.header-row{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;}
+.level-badge{background:var(--surface2);border:1px solid var(--border);padding:8px 16px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:28px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);padding:18px;border-radius:6px;position:relative;overflow:hidden;transition:border-color .2s;}
+.stat-card:hover{border-color:var(--accent2);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.g::before{background:var(--accent);}.stat-card.b::before{background:var(--accent2);}
+.stat-card.y::before{background:var(--accent3);}.stat-card.r::before{background:var(--accent4);}
+.stat-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;}
+.stat-value{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;margin-top:4px;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* TIMER - compact fixed widget */
+.timer-bar{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:12px 16px;
+  box-shadow:0 8px 32px rgba(0,0,0,.6);
+  display:flex;flex-direction:column;gap:8px;
+  min-width:180px;
+  transition:box-shadow .2s;
+}
+.timer-bar:hover{box-shadow:0 12px 40px rgba(0,0,0,.7);}
+.timer-top-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.timer-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.timer-display{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;letter-spacing:2px;color:var(--accent);transition:color .3s;line-height:1;}
+.timer-display.running{color:var(--accent3);}
+.timer-display.paused{color:var(--accent);animation:tblink 1.4s ease-in-out infinite;}
+@keyframes tblink{0%,100%{opacity:1}50%{opacity:.4}}
+.timer-controls{display:flex;gap:6px;align-items:center;}
+.t-btn{width:30px;height:30px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;flex-shrink:0;}
+.t-btn.play{background:var(--accent3);color:var(--bg);}
+.t-btn.play:hover{transform:scale(1.1);}
+.t-btn.pause-active{background:var(--accent);color:var(--bg);}
+.t-btn.reset{background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:15px;}
+.t-btn.reset:hover{color:var(--accent4);border-color:var(--accent4);}
+.timer-bottom-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.timer-subject-select{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:9px;outline:none;cursor:pointer;width:100%;}
+.timer-subject-select:focus{border-color:var(--accent2);}
+.timer-status{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;text-align:right;white-space:nowrap;}
+.timer-status.on{color:var(--accent3);}
+.timer-divider{display:none;}
+.timer-session-info{display:none;}
+.timer-today{display:none;}
+@media(max-width:480px){.timer-bar{bottom:12px;right:12px;min-width:160px;}}
+
+/* TABS */
+.tabs{display:flex;gap:0;margin-bottom:30px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.tab-btn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:10px 14px;background:none;border:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-btn:hover:not(.active){color:var(--text);}
+.tab-panel{display:none;}.tab-panel.active{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.section-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:8px;}
+.section-title span{color:var(--accent);}
+.section-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+.ldot{width:8px;height:8px;border-radius:50%;}
+
+/* DAY CARDS */
+.week-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:36px;}
+.day-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:transform .2s,border-color .2s;}
+.day-card:hover{transform:translateY(-2px);border-color:var(--accent2);}
+.day-header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;background:var(--surface2);border-bottom:1px solid var(--border);}
+.day-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
+.day-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 8px;border-radius:2px;}
+.bf{background:rgba(91,141,238,.15);color:var(--accent2);border:1px solid rgba(91,141,238,.3);}
+.bm{background:rgba(240,192,64,.15);color:var(--accent3);border:1px solid rgba(240,192,64,.3);}
+.br{background:rgba(61,217,179,.15);color:var(--accent);border:1px solid rgba(61,217,179,.3);}
+.bp{background:rgba(192,132,252,.15);color:var(--tools);border:1px solid rgba(192,132,252,.3);}
+.day-body{padding:12px 16px;}
+.session{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--border);}
+.session:last-child{border-bottom:none;}
+.sdot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.py{background:var(--python);}.ml{background:var(--ml);}.st{background:var(--stats);}
+.sq{background:var(--sql);}.tl{background:var(--tools);}.pj{background:var(--project);}.rv{background:var(--muted);}
+.session-info{flex:1;}
+.s-subj{font-size:13px;font-weight:600;}
+.s-detail{font-size:11px;color:var(--muted);margin-top:1px;}
+.s-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;background:var(--surface2);padding:2px 7px;border-radius:2px;align-self:flex-start;margin-top:3px;}
+
+/* TRACKER */
+.tracker-form{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:24px;margin-bottom:24px;}
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:14px;}
+label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;display:block;margin-bottom:5px;}
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 13px;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent2);}
+select option{background:var(--surface2);}
+.slider-wrap{display:flex;align-items:center;gap:12px;}
+input[type=range]{flex:1;padding:0;background:transparent;border:none;accent-color:var(--accent);}
+.slider-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--accent3);min-width:36px;text-align:right;}
+.btn{background:var(--accent2);color:#fff;border:none;padding:11px 26px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:opacity .2s,transform .1s;}
+.btn:hover{opacity:.85;}.btn:active{transform:scale(.98);}
+.btn-r{background:var(--accent4);}
+.btn-g{background:var(--accent);color:var(--bg);}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+
+/* LOG */
+.log-list{display:flex;flex-direction:column;gap:10px;}
+.log-entry{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px 18px;display:flex;align-items:center;gap:14px;animation:slideIn .3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.log-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.log-main{flex:1;}
+.log-subject{font-weight:600;font-size:13px;}
+.log-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.log-right{text-align:right;flex-shrink:0;}
+.log-score{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;}
+.s-hi{color:var(--accent);}.s-mid{color:var(--accent3);}.s-lo{color:var(--accent4);}
+.log-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.log-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;transition:color .2s;}
+.log-del:hover{color:var(--accent4);}
+.empty-state{text-align:center;padding:44px 20px;color:var(--muted);border:1px dashed var(--border);border-radius:6px;font-size:13px;}
+
+/* ANALYSIS */
+.analysis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-bottom:30px;}
+.a-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:22px;}
+.a-card h3{font-family:'Playfair Display',serif;font-size:15px;margin-bottom:16px;}
+.bar-row{margin-bottom:12px;}
+.bar-top{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px;}
+.bar-pct{font-family:'DM Mono',monospace;color:var(--muted);}
+.bar-track{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width .7s ease;}
+.insight-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--border);font-size:12px;}
+.insight-item:last-child{border-bottom:none;}
+.insight-icon{font-size:14px;flex-shrink:0;}
+.insight-text{color:var(--muted);line-height:1.5;}
+.insight-text strong{color:var(--text);}
+
+/* STREAK */
+.streak-wrap{margin-top:12px;}
+.streak-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:10px;}
+.streak-grid{display:flex;flex-wrap:wrap;gap:5px;}
+.s-day{width:26px;height:26px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:8px;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s;}
+.s-day.done{background:rgba(61,217,179,.18);border-color:var(--accent);color:var(--accent);}
+.s-day.today{border-color:var(--accent3);color:var(--accent3);}
+.s-day:hover{border-color:var(--accent2);}
+
+/* TIPS */
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+.tip-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid;border-radius:6px;padding:18px;}
+.tip-card.tg{border-left-color:var(--accent);}.tip-card.tb{border-left-color:var(--accent2);}
+.tip-card.ty{border-left-color:var(--accent3);}.tip-card.tr{border-left-color:var(--accent4);}.tip-card.tp{border-left-color:var(--tools);}
+.tip-icon{font-size:18px;margin-bottom:8px;}
+.tip-title{font-weight:700;font-size:13px;margin-bottom:6px;}
+.tip-text{font-size:12px;color:var(--muted);line-height:1.65;}
+
+/* SYLLABUS */
+.syllabus-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;}
+.syl-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:visible;min-width:0;}
+.syl-header{padding:12px 16px;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.syl-body{padding:10px 16px 14px;}
+.topic{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--border);font-size:12px;cursor:pointer;min-width:0;}
+.topic:last-child{border-bottom:none;}
+.topic input[type=checkbox]{accent-color:var(--accent);cursor:pointer;flex-shrink:0;width:14px;height:14px;}
+.topic-label{flex:1;min-width:0;white-space:normal;word-break:break-word;line-height:1.4;}
+.topic.checked .topic-label{text-decoration:line-through;color:var(--muted);}
+.pbadge{margin-left:8px;font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:2px;letter-spacing:1px;flex-shrink:0;white-space:nowrap;}
+.ph{background:rgba(240,96,96,.15);color:var(--accent4);border:1px solid rgba(240,96,96,.3);}
+.pm{background:rgba(240,192,64,.15);color:var(--accent3);border:1px solid rgba(240,192,64,.3);}
+.pl{background:rgba(61,217,179,.15);color:var(--accent);border:1px solid rgba(61,217,179,.3);}
+
+/* ROADMAP */
+.roadmap{display:flex;flex-direction:column;gap:0;margin-bottom:30px;position:relative;}
+.roadmap::before{content:'';position:absolute;left:19px;top:24px;bottom:24px;width:2px;background:var(--border);}
+.rm-step{display:flex;gap:16px;align-items:flex-start;padding:16px 0;}
+.rm-dot{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:2px solid;z-index:1;}
+.rm-dot.active{background:rgba(61,217,179,.15);border-color:var(--accent);}
+.rm-dot.upcoming{background:var(--surface2);border-color:var(--border);}
+.rm-content{flex:1;padding-top:6px;}
+.rm-phase{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.rm-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin:3px 0;}
+.rm-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+.rm-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.rm-tag{font-family:'DM Mono',monospace;font-size:9px;padding:3px 8px;border-radius:2px;letter-spacing:1px;}
+
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+@media(max-width:600px){.log-entry{flex-wrap:wrap;}.tab-btn{padding:8px 10px;font-size:9px;}}
+
+/* JOB TRACKER */
+.job-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:24px;}
+.job-stat{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px 16px;text-align:center;position:relative;overflow:hidden;}
+.job-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.js-total::before{background:var(--accent2);}
+.js-int::before{background:var(--accent);}
+.js-offer::before{background:var(--accent3);}
+.js-rej::before{background:var(--accent4);}
+.js-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-top:4px;}
+.js-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+
+.job-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center;}
+.filter-btn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;transition:all .2s;}
+.filter-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(61,217,179,.08);}
+.filter-btn:hover:not(.active){color:var(--text);border-color:var(--muted);}
+.search-input{flex:1;min-width:160px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;}
+.search-input:focus{border-color:var(--accent2);}
+
+.job-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start;transition:border-color .2s,transform .15s;animation:slideIn .3s ease;}
+.job-card:hover{border-color:var(--accent2);transform:translateY(-1px);}
+.job-status-dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.st-applied{background:var(--accent2);}
+.st-interview{background:var(--accent3);}
+.st-offer{background:#22c55e;}
+.st-rejected{background:var(--accent4);}
+.st-ghosted{background:var(--muted);}
+.st-withdrawn{background:var(--accent3); opacity:.5;}
+
+.job-main{min-width:0;}
+.job-role{font-weight:700;font-size:14px;margin-bottom:3px;}
+.job-company{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:4px;}
+.job-meta-row{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--muted);margin-bottom:6px;}
+.job-meta-row span{display:flex;align-items:center;gap:4px;}
+.job-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.job-tag{font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:2px;letter-spacing:1px;}
+
+.job-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
+.status-select{font-family:'DM Mono',monospace;font-size:10px;padding:4px 8px;border-radius:4px;border:1px solid;cursor:pointer;outline:none;background:transparent;letter-spacing:.5px;}
+.status-applied{color:var(--accent2);border-color:rgba(91,141,238,.4);background:rgba(91,141,238,.08);}
+.status-interview{color:var(--accent3);border-color:rgba(61,217,179,.4);background:rgba(61,217,179,.08);}
+.status-offer{color:#22c55e;border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.08);}
+.status-rejected{color:var(--accent4);border-color:rgba(240,96,96,.4);background:rgba(240,96,96,.08);}
+.status-ghosted{color:var(--muted);border-color:rgba(90,120,154,.4);background:rgba(90,120,154,.08);}
+.status-withdrawn{color:var(--muted);border-color:rgba(90,120,154,.3);background:rgba(90,120,154,.05);}
+.job-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.job-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px;transition:color .2s;line-height:1;}
+.job-del-btn:hover{color:var(--accent4);}
+.job-note{font-size:11px;color:var(--muted);margin-top:6px;padding:6px 10px;background:var(--surface2);border-radius:4px;border-left:2px solid var(--border);line-height:1.5;}
+
+
+/* ── LAYOUT: sidebar wrapper ── */
+.page-with-sidebar{display:flex;gap:0;align-items:flex-start;position:relative;}
+.main-content{flex:1;min-width:0;transition:margin-right .3s;}
+.main-content.sidebar-open{margin-right:380px;}
+
+/* ── AI SIDEBAR ── */
+.ai-sidebar{
+  position:fixed;top:0;right:-400px;width:380px;height:100vh;
+  background:var(--surface);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:500;
+  transition:right .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:-8px 0 32px rgba(0,0,0,.5);
+}
+.ai-sidebar.open{right:0;}
+.ai-sidebar-header{
+  padding:16px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface2);flex-shrink:0;
+}
+.ai-sidebar-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;}
+.ai-sidebar-title span{color:var(--accent);}
+.ai-sidebar-subtitle{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.ai-close-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1;padding:4px;transition:color .2s;}
+.ai-close-btn:hover{color:var(--accent4);}
+
+.ai-quick-btns{display:flex;gap:6px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.ai-quick-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.5px;padding:5px 10px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ai-quick-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(61,217,179,.06);}
+
+.ai-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;}
+.ai-msg{display:flex;gap:10px;align-items:flex-start;animation:msgIn .25s ease;}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ai-msg.user{flex-direction:row-reverse;}
+.ai-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px;}
+.ai-avatar.bot{background:rgba(61,217,179,.15);border:1px solid rgba(61,217,179,.3);}
+.ai-avatar.user{background:rgba(91,141,238,.15);border:1px solid rgba(91,141,238,.3);}
+.ai-bubble{max-width:85%;padding:10px 13px;border-radius:10px;font-size:12px;line-height:1.65;}
+.ai-bubble.bot{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:2px;color:var(--text);}
+.ai-bubble.user{background:rgba(91,141,238,.15);border:1px solid rgba(91,141,238,.25);border-bottom-right-radius:2px;color:var(--text);}
+.ai-bubble pre{background:rgba(0,0,0,.3);padding:8px 10px;border-radius:4px;overflow-x:auto;font-size:11px;margin:6px 0;font-family:'DM Mono',monospace;white-space:pre-wrap;}
+.ai-bubble code{font-family:'DM Mono',monospace;background:rgba(0,0,0,.25);padding:1px 5px;border-radius:3px;font-size:11px;}
+.ai-bubble strong{color:var(--accent3);}
+.ai-typing{display:flex;gap:4px;align-items:center;padding:6px 0;}
+.ai-typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:typeDot 1.2s infinite;}
+.ai-typing span:nth-child(2){animation-delay:.2s;}
+.ai-typing span:nth-child(3){animation-delay:.4s;}
+@keyframes typeDot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+
+.ai-input-area{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;background:var(--surface2);}
+.ai-input-row{display:flex;gap:8px;align-items:flex-end;}
+.ai-input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;resize:none;max-height:100px;min-height:38px;line-height:1.5;transition:border-color .2s;}
+.ai-input:focus{border-color:var(--accent2);}
+.ai-send-btn{width:36px;height:36px;border-radius:8px;border:none;background:var(--accent);color:var(--bg);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.ai-send-btn:hover{opacity:.85;transform:scale(1.05);}
+.ai-send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.ai-hint{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px;text-align:center;letter-spacing:.5px;}
+
+/* ── AI TOGGLE BUTTON ── */
+.ai-toggle-btn{
+  position:fixed;bottom:90px;left:24px;z-index:400;
+  width:52px;height:52px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
+  color:#fff;font-size:22px;cursor:pointer;
+  box-shadow:0 4px 20px rgba(91,141,238,.4);
+  transition:all .2s;display:flex;align-items:center;justify-content:center;
+}
+.ai-toggle-btn:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(91,141,238,.5);}
+.ai-toggle-btn.active{background:linear-gradient(135deg,var(--accent4),#c84b6e);}
+.ai-badge{position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:var(--accent4);font-size:8px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;display:none;}
+
+/* ── ADVANCED TRACKING ── */
+.adv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-bottom:28px;}
+.adv-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;}
+.adv-card-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.adv-card-title span{color:var(--accent);}
+
+/* Heatmap */
+.heatmap-wrap{overflow-x:auto;padding-bottom:4px;}
+.heatmap-grid{display:grid;grid-template-columns:repeat(52,12px);grid-template-rows:repeat(7,12px);gap:2px;width:max-content;}
+.hm-cell{width:12px;height:12px;border-radius:2px;background:var(--surface2);border:1px solid var(--border);transition:all .15s;cursor:pointer;}
+.hm-cell:hover{transform:scale(1.3);z-index:1;position:relative;}
+.hm-0{background:var(--surface2);}
+.hm-1{background:rgba(61,217,179,.25);border-color:rgba(61,217,179,.3);}
+.hm-2{background:rgba(61,217,179,.45);border-color:rgba(61,217,179,.5);}
+.hm-3{background:rgba(61,217,179,.65);border-color:rgba(61,217,179,.7);}
+.hm-4{background:rgba(61,217,179,.9);border-color:var(--accent);}
+.hm-months{display:flex;gap:0;margin-bottom:4px;font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);}
+.hm-day-labels{display:grid;grid-template-rows:repeat(7,12px);gap:2px;margin-right:6px;font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);align-items:center;}
+
+/* Chart bars */
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:120px;padding-bottom:20px;position:relative;}
+.chart-bars::after{content:'';position:absolute;bottom:20px;left:0;right:0;height:1px;background:var(--border);}
+.chart-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:0;}
+.chart-bar{width:100%;border-radius:3px 3px 0 0;transition:height .6s ease,background .2s;cursor:pointer;min-height:2px;}
+.chart-bar:hover{filter:brightness(1.3);}
+.chart-bar-label{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;width:100%;text-overflow:ellipsis;}
+.chart-bar-val{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);position:absolute;top:-16px;left:50%;transform:translateX(-50%);white-space:nowrap;}
+
+/* Accuracy trend dots */
+.trend-line{position:relative;height:100px;margin-bottom:20px;}
+.trend-svg{width:100%;height:100%;overflow:visible;}
+
+/* Legend */
+.adv-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;}
+.adv-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.adv-legend-dot{width:8px;height:8px;border-radius:50%;}
+
+/* Streak counter */
+.streak-number{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;color:var(--accent);line-height:1;}
+.streak-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+
+@media(max-width:768px){
+  .ai-sidebar{width:100vw;right:-100vw;}
+  .main-content.sidebar-open{margin-right:0;}
+  .ai-toggle-btn{bottom:80px;left:16px;}
+}
+
+</style>
+</head>
+<body>
+<div class="page-with-sidebar"><div class="container main-content" id="mainContent">
+
+<!-- NAV -->
+<div class="nav-bar">
+  <a href="index.html" class="nav-link">← All Planners</a>
+  <span class="nav-sep">|</span>
+  <span class="nav-active">Data Science & IT</span>
+  <a href="study_plan_tracker.html" style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-decoration:none;background:var(--surface2);padding:6px 14px;border-radius:4px;border:1px solid var(--border);transition:color .2s;" onmouseover="this.style.color='var(--accent3)'" onmouseout="this.style.color='var(--muted)'">RBI & SSC →</a>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-row">
+    <div>
+      <div class="exam-tags">
+        <span class="tag tag-ds">Data Science</span>
+        <span class="tag tag-it">IT / Tech</span>
+        <span class="tag tag-ml">Machine Learning</span>
+      </div>
+      <h1>Data Science & <span>IT</span> Planner</h1>
+      <p class="subtitle">Ongoing · 4–5 hrs/day · Python · ML · SQL · System Design · Projects</p>
+    </div>
+    <div class="level-badge">🔬 Ongoing · Self-Paced</div>
+  </div>
+</header>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card g"><div class="stat-label">Days Studied</div><div class="stat-value" id="statDays">0</div><div class="stat-sub">Logged sessions</div></div>
+  <div class="stat-card b"><div class="stat-label">Avg Score</div><div class="stat-value" id="statAcc">—</div><div class="stat-sub">All subjects</div></div>
+  <div class="stat-card y"><div class="stat-label">Topics Done</div><div class="stat-value" id="statTopics">0</div><div class="stat-sub">Syllabus checklist</div></div>
+  <div class="stat-card r"><div class="stat-label">Weakest Area</div><div class="stat-value" id="statWeak" style="font-size:16px;margin-top:8px;">—</div><div class="stat-sub">By score</div></div>
+</div>
+
+<!-- TIMER -->
+<div class="timer-bar">
+  <div>
+    <div class="timer-label">⏱ Study Timer</div>
+    <div class="timer-display" id="timerDisplay">00:00:00</div>
+    <div class="timer-status" id="timerStatus">Stopped</div>
+  </div>
+  <div class="timer-controls">
+    <button class="t-btn play" id="timerPlayBtn" onclick="timerToggle()">▶</button>
+    <button class="t-btn reset" onclick="timerReset()">↺</button>
+  </div>
+  <div class="timer-divider"></div>
+  <div class="timer-session-info">
+    <div class="timer-session-label">Now Studying</div>
+    <select class="timer-subject-select" id="timerSubject">
+      <option value="Python">🐍 Python</option>
+      <option value="Machine Learning">🤖 Machine Learning</option>
+      <option value="Statistics">📊 Statistics & Math</option>
+      <option value="SQL & Databases">🗄️ SQL & Databases</option>
+      <option value="Deep Learning">🧠 Deep Learning</option>
+      <option value="Data Engineering">⚙️ Data Engineering</option>
+      <option value="System Design">🏗️ System Design</option>
+      <option value="DSA">🔢 DSA / Algorithms</option>
+      <option value="Cloud & DevOps">☁️ Cloud & DevOps</option>
+      <option value="Project Work">🚀 Project Work</option>
+    </select>
+  </div>
+  <div class="timer-today">
+    <div>Today's total</div>
+    <span id="timerTodayTotal">0 min</span>
+    <div style="font-size:10px;margin-top:2px;">logged sessions</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('plan',this)">📅 Weekly Plan</button>
+  <button class="tab-btn" onclick="switchTab('roadmap',this)">🗺️ Roadmap</button>
+  <button class="tab-btn" onclick="switchTab('tracker',this)">📊 Tracker</button>
+  <button class="tab-btn" onclick="switchTab('analysis',this)">🔍 Analysis</button>
+  <button class="tab-btn" onclick="switchTab('syllabus',this)">📚 Syllabus</button>
+  <button class="tab-btn" onclick="switchTab('tips',this)">💡 Strategy</button>
+  <button class="tab-btn" onclick="switchTab('custom',this)">✏️ Custom Plan</button>
+  <button class="tab-btn" onclick="switchTab('jobs',this)">💼 Job Tracker</button>
+  <button class="tab-btn" onclick="switchTab('advanced',this)">📈 Advanced Tracking</button>
+</div>
+
+<!-- PLAN TAB -->
+<div class="tab-panel active" id="tab-plan">
+  <div class="section-title">7-Day <span>Study Schedule</span></div>
+  <p class="section-sub">4–5 hrs/day · Adjust based on your current phase (Foundation / Practice / Project) · Focus shifts as you progress</p>
+  <div class="legend">
+    <div class="legend-item"><div class="ldot" style="background:var(--python)"></div>Python / Coding</div>
+    <div class="legend-item"><div class="ldot" style="background:var(--ml)"></div>ML / Deep Learning</div>
+    <div class="legend-item"><div class="ldot" style="background:var(--stats)"></div>Stats & Math</div>
+    <div class="legend-item"><div class="ldot" style="background:var(--sql)"></div>SQL / Databases</div>
+    <div class="legend-item"><div class="ldot" style="background:var(--tools)"></div>Tools / Cloud / DevOps</div>
+    <div class="legend-item"><div class="ldot" style="background:var(--project)"></div>Project Work</div>
+  </div>
+  <div class="week-grid">
+    <!-- MON -->
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Monday</div><span class="day-badge bf">Python + ML</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot py"></div><div class="session-info"><div class="s-subj">Python – OOP & Data Structures</div><div class="s-detail">Classes, list/dict comprehensions, iterators</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot ml"></div><div class="session-info"><div class="s-subj">ML – Supervised Learning</div><div class="s-detail">Linear regression theory + sklearn implementation</div></div><div class="s-time">70 min</div></div>
+        <div class="session"><div class="sdot st"></div><div class="session-info"><div class="s-subj">Statistics – Probability Basics</div><div class="s-detail">Distributions, Bayes theorem, expectation</div></div><div class="s-time">50 min</div></div>
+        <div class="session"><div class="sdot py"></div><div class="session-info"><div class="s-subj">LeetCode / HackerRank</div><div class="s-detail">3–5 Easy problems: arrays & strings</div></div><div class="s-time">45 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Revision</div><div class="s-detail">Notes + Anki flashcards for concepts</div></div><div class="s-time">20 min</div></div>
+      </div>
+    </div>
+    <!-- TUE -->
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Tuesday</div><span class="day-badge bf">Stats + SQL</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot st"></div><div class="session-info"><div class="s-subj">Statistics – Hypothesis Testing</div><div class="s-detail">p-value, t-test, chi-square, ANOVA</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot sq"></div><div class="session-info"><div class="s-subj">SQL – Joins & Aggregations</div><div class="s-detail">INNER/LEFT/OUTER joins, GROUP BY, HAVING</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot ml"></div><div class="session-info"><div class="s-subj">ML – Classification Algorithms</div><div class="s-detail">Logistic regression, Decision trees, KNN</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot py"></div><div class="session-info"><div class="s-subj">Pandas & NumPy Practice</div><div class="s-detail">Data cleaning, transformation, EDA on dataset</div></div><div class="s-time">45 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Revision</div><div class="s-detail">SQL query practice + formula sheet update</div></div><div class="s-time">20 min</div></div>
+      </div>
+    </div>
+    <!-- WED -->
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Wednesday</div><span class="day-badge bp">Tools + Cloud</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot tl"></div><div class="session-info"><div class="s-subj">Git & GitHub</div><div class="s-detail">Branching, PRs, CI/CD basics, GitHub Actions</div></div><div class="s-time">50 min</div></div>
+        <div class="session"><div class="sdot tl"></div><div class="session-info"><div class="s-subj">Cloud – AWS / GCP Basics</div><div class="s-detail">S3, EC2, BigQuery, Cloud Storage concepts</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot ml"></div><div class="session-info"><div class="s-subj">ML – Model Evaluation & Tuning</div><div class="s-detail">Confusion matrix, ROC-AUC, GridSearchCV</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot sq"></div><div class="session-info"><div class="s-subj">SQL – Window Functions</div><div class="s-detail">ROW_NUMBER, RANK, LAG, LEAD, CTEs</div></div><div class="s-time">50 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Revision</div><div class="s-detail">Git commands cheatsheet + Cloud notes</div></div><div class="s-time">20 min</div></div>
+      </div>
+    </div>
+    <!-- THU -->
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Thursday</div><span class="day-badge bf">Deep Learning</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot ml"></div><div class="session-info"><div class="s-subj">Deep Learning – Neural Networks</div><div class="s-detail">Backprop, activation functions, gradient descent</div></div><div class="s-time">70 min</div></div>
+        <div class="session"><div class="sdot py"></div><div class="session-info"><div class="s-subj">TensorFlow / PyTorch Basics</div><div class="s-detail">Build a simple MLP, train on MNIST</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot st"></div><div class="session-info"><div class="s-subj">Linear Algebra for ML</div><div class="s-detail">Matrices, eigenvalues, PCA intuition</div></div><div class="s-time">50 min</div></div>
+        <div class="session"><div class="sdot py"></div><div class="session-info"><div class="s-subj">DSA – Recursion & Trees</div><div class="s-detail">3–4 medium problems on LeetCode</div></div><div class="s-time">45 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Revision</div><div class="s-detail">DL architecture diagrams & notes</div></div><div class="s-time">20 min</div></div>
+      </div>
+    </div>
+    <!-- FRI -->
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Friday</div><span class="day-badge bf">System Design + DE</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot tl"></div><div class="session-info"><div class="s-subj">System Design</div><div class="s-detail">Scalability, load balancing, CAP theorem</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot tl"></div><div class="session-info"><div class="s-subj">Data Engineering – Pipelines</div><div class="s-detail">ETL/ELT concepts, Airflow, Spark intro</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot sq"></div><div class="session-info"><div class="s-subj">SQL – Query Optimization</div><div class="s-detail">Indexing, execution plans, normalization</div></div><div class="s-time">45 min</div></div>
+        <div class="session"><div class="sdot ml"></div><div class="session-info"><div class="s-subj">ML – Ensemble Methods</div><div class="s-detail">Random Forest, XGBoost, Bagging vs Boosting</div></div><div class="s-time">55 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Revision</div><div class="s-detail">System design patterns cheatsheet</div></div><div class="s-time">20 min</div></div>
+      </div>
+    </div>
+    <!-- SAT -->
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Saturday</div><span class="day-badge bm">Project Day</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot pj"></div><div class="session-info"><div class="s-subj">Project Work – Build / Code</div><div class="s-detail">Work on your DS/ML project (EDA, modelling, API)</div></div><div class="s-time">90 min</div></div>
+        <div class="session"><div class="sdot py"></div><div class="session-info"><div class="s-subj">Kaggle / Dataset Challenge</div><div class="s-detail">Explore a new dataset, submit a notebook</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot tl"></div><div class="session-info"><div class="s-subj">Portfolio Update</div><div class="s-detail">GitHub README, LinkedIn project post</div></div><div class="s-time">40 min</div></div>
+        <div class="session"><div class="sdot ml"></div><div class="session-info"><div class="s-subj">Read a Paper / Blog</div><div class="s-detail">ArXiv / Towards Data Science — 1 article deep</div></div><div class="s-time">40 min</div></div>
+      </div>
+    </div>
+    <!-- SUN -->
+    <div class="day-card">
+      <div class="day-header"><div class="day-name">Sunday</div><span class="day-badge br">Revision Day</span></div>
+      <div class="day-body">
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Week Revision – ML Concepts</div><div class="s-detail">Flashcards + re-implement 1 algorithm from scratch</div></div><div class="s-time">60 min</div></div>
+        <div class="session"><div class="sdot sq"></div><div class="session-info"><div class="s-subj">SQL Practice Set</div><div class="s-detail">10 hard SQL problems on StrataScratch / Mode</div></div><div class="s-time">50 min</div></div>
+        <div class="session"><div class="sdot py"></div><div class="session-info"><div class="s-subj">DSA Weekly Review</div><div class="s-detail">Re-attempt 3 wrong problems from the week</div></div><div class="s-time">50 min</div></div>
+        <div class="session"><div class="sdot pj"></div><div class="session-info"><div class="s-subj">Project Planning</div><div class="s-detail">Set next week's goals, update tracker</div></div><div class="s-time">30 min</div></div>
+        <div class="session"><div class="sdot rv"></div><div class="session-info"><div class="s-subj">Watch 1 Talk / Lecture</div><div class="s-detail">3Blue1Brown / fast.ai / Andrew Ng lecture</div></div><div class="s-time">40 min</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROADMAP TAB -->
+<div class="tab-panel" id="tab-roadmap">
+  <div class="section-title">Learning <span>Roadmap</span></div>
+  <p class="section-sub">Phase-by-phase guide from beginner to job-ready Data Scientist / IT professional.</p>
+  <div class="roadmap">
+    <div class="rm-step">
+      <div class="rm-dot active">🐍</div>
+      <div class="rm-content">
+        <div class="rm-phase">Phase 1 · Months 1–2</div>
+        <div class="rm-title">Python & Math Foundations</div>
+        <div class="rm-desc">Master Python OOP, data structures, NumPy, Pandas, Matplotlib. Build linear algebra, calculus, and probability intuition. Complete 50 LeetCode easy problems.</div>
+        <div class="rm-tags">
+          <span class="rm-tag" style="background:rgba(61,217,179,.12);color:var(--accent);border:1px solid rgba(61,217,179,.3);">Python</span>
+          <span class="rm-tag" style="background:rgba(240,192,64,.12);color:var(--accent3);border:1px solid rgba(240,192,64,.3);">NumPy / Pandas</span>
+          <span class="rm-tag" style="background:rgba(91,141,238,.12);color:var(--accent2);border:1px solid rgba(91,141,238,.3);">Linear Algebra</span>
+          <span class="rm-tag" style="background:rgba(240,192,64,.12);color:var(--accent3);border:1px solid rgba(240,192,64,.3);">Statistics</span>
+        </div>
+      </div>
+    </div>
+    <div class="rm-step">
+      <div class="rm-dot active">🤖</div>
+      <div class="rm-content">
+        <div class="rm-phase">Phase 2 · Months 3–4</div>
+        <div class="rm-title">Classical Machine Learning</div>
+        <div class="rm-desc">Supervised (regression, classification) and unsupervised learning (clustering, PCA). Model evaluation, cross-validation, hyperparameter tuning. Complete 2 Kaggle competitions.</div>
+        <div class="rm-tags">
+          <span class="rm-tag" style="background:rgba(91,141,238,.12);color:var(--accent2);border:1px solid rgba(91,141,238,.3);">Scikit-learn</span>
+          <span class="rm-tag" style="background:rgba(240,192,64,.12);color:var(--accent3);border:1px solid rgba(240,192,64,.3);">XGBoost</span>
+          <span class="rm-tag" style="background:rgba(61,217,179,.12);color:var(--accent);border:1px solid rgba(61,217,179,.3);">Feature Engineering</span>
+          <span class="rm-tag" style="background:rgba(240,96,96,.12);color:var(--accent4);border:1px solid rgba(240,96,96,.3);">Kaggle</span>
+        </div>
+      </div>
+    </div>
+    <div class="rm-step">
+      <div class="rm-dot active">🗄️</div>
+      <div class="rm-content">
+        <div class="rm-phase">Phase 3 · Month 5</div>
+        <div class="rm-title">SQL & Data Engineering</div>
+        <div class="rm-desc">Advanced SQL, window functions, CTEs, query optimisation. ETL pipelines, Apache Airflow basics, introduction to Spark. Work with PostgreSQL and BigQuery.</div>
+        <div class="rm-tags">
+          <span class="rm-tag" style="background:rgba(240,128,64,.12);color:var(--sql);border:1px solid rgba(240,128,64,.3);">SQL Advanced</span>
+          <span class="rm-tag" style="background:rgba(192,132,252,.12);color:var(--tools);border:1px solid rgba(192,132,252,.3);">Airflow</span>
+          <span class="rm-tag" style="background:rgba(91,141,238,.12);color:var(--accent2);border:1px solid rgba(91,141,238,.3);">Spark Intro</span>
+        </div>
+      </div>
+    </div>
+    <div class="rm-step">
+      <div class="rm-dot upcoming">🧠</div>
+      <div class="rm-content">
+        <div class="rm-phase">Phase 4 · Months 6–7</div>
+        <div class="rm-title">Deep Learning & NLP</div>
+        <div class="rm-desc">Neural networks, CNNs, RNNs, Transformers. NLP with HuggingFace. Fine-tune a pre-trained LLM on a custom dataset. Build a real-world DL project.</div>
+        <div class="rm-tags">
+          <span class="rm-tag" style="background:rgba(91,141,238,.12);color:var(--accent2);border:1px solid rgba(91,141,238,.3);">PyTorch</span>
+          <span class="rm-tag" style="background:rgba(61,217,179,.12);color:var(--accent);border:1px solid rgba(61,217,179,.3);">HuggingFace</span>
+          <span class="rm-tag" style="background:rgba(192,132,252,.12);color:var(--tools);border:1px solid rgba(192,132,252,.3);">Transformers</span>
+        </div>
+      </div>
+    </div>
+    <div class="rm-step">
+      <div class="rm-dot upcoming">☁️</div>
+      <div class="rm-content">
+        <div class="rm-phase">Phase 5 · Month 8</div>
+        <div class="rm-title">MLOps, Cloud & Deployment</div>
+        <div class="rm-desc">Docker, Kubernetes basics, model serving with FastAPI/Flask. MLflow for experiment tracking. Deploy on AWS / GCP. Build a production-ready ML pipeline end-to-end.</div>
+        <div class="rm-tags">
+          <span class="rm-tag" style="background:rgba(192,132,252,.12);color:var(--tools);border:1px solid rgba(192,132,252,.3);">Docker</span>
+          <span class="rm-tag" style="background:rgba(91,141,238,.12);color:var(--accent2);border:1px solid rgba(91,141,238,.3);">FastAPI</span>
+          <span class="rm-tag" style="background:rgba(240,192,64,.12);color:var(--accent3);border:1px solid rgba(240,192,64,.3);">MLflow</span>
+          <span class="rm-tag" style="background:rgba(61,217,179,.12);color:var(--accent);border:1px solid rgba(61,217,179,.3);">AWS/GCP</span>
+        </div>
+      </div>
+    </div>
+    <div class="rm-step">
+      <div class="rm-dot upcoming">🚀</div>
+      <div class="rm-content">
+        <div class="rm-phase">Phase 6 · Months 9–12</div>
+        <div class="rm-title">Portfolio, System Design & Job Prep</div>
+        <div class="rm-desc">3 end-to-end projects on GitHub. System design interviews (LLD & HLD). 100 LeetCode medium problems. Data science case study preparation. Mock interviews + resume polish.</div>
+        <div class="rm-tags">
+          <span class="rm-tag" style="background:rgba(240,96,96,.12);color:var(--accent4);border:1px solid rgba(240,96,96,.3);">Portfolio</span>
+          <span class="rm-tag" style="background:rgba(61,217,179,.12);color:var(--accent);border:1px solid rgba(61,217,179,.3);">System Design</span>
+          <span class="rm-tag" style="background:rgba(192,132,252,.12);color:var(--tools);border:1px solid rgba(192,132,252,.3);">Interviews</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRACKER TAB -->
+<div class="tab-panel" id="tab-tracker">
+  <div class="section-title">Daily <span>Progress Log</span></div>
+  <p class="section-sub">Log every session — concept understanding, coding practice, or project work.</p>
+  <div class="tracker-form">
+    <div class="form-row">
+      <div><label>Date</label><input type="date" id="logDate"></div>
+      <div><label>Subject</label>
+        <select id="logSubject">
+          <option value="Python">🐍 Python / Coding</option>
+          <option value="Machine Learning">🤖 Machine Learning</option>
+          <option value="Statistics">📊 Statistics & Math</option>
+          <option value="SQL & Databases">🗄️ SQL & Databases</option>
+          <option value="Deep Learning">🧠 Deep Learning</option>
+          <option value="Data Engineering">⚙️ Data Engineering</option>
+          <option value="System Design">🏗️ System Design</option>
+          <option value="DSA">🔢 DSA / Algorithms</option>
+          <option value="Cloud & DevOps">☁️ Cloud & DevOps</option>
+          <option value="Project Work">🚀 Project Work</option>
+        </select>
+      </div>
+      <div><label>Topic Covered</label><input type="text" id="logTopic" placeholder="e.g. Random Forest, SQL Joins"></div>
+    </div>
+    <div class="form-row">
+      <div><label>Problems / Exercises</label><input type="number" id="logAttempted" min="0" placeholder="e.g. 10"></div>
+      <div><label>Solved Correctly</label><input type="number" id="logCorrect" min="0" placeholder="e.g. 7"></div>
+      <div><label>Time Spent (min)</label><input type="number" id="logTime" min="0" placeholder="e.g. 60"></div>
+    </div>
+    <div class="form-row">
+      <div style="grid-column:1/-1;">
+        <label>Understanding Level: <span id="confLabel">3 / 5</span></label>
+        <div class="slider-wrap">
+          <input type="range" id="logConf" min="1" max="5" value="3" oninput="document.getElementById('confLabel').textContent=this.value+' / 5';document.getElementById('confVal').textContent=this.value;">
+          <div class="slider-val" id="confVal">3</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div style="grid-column:1/-1;"><label>Notes / Key Learnings</label><textarea id="logNotes" rows="2" placeholder="Key concepts, bugs fixed, resources used, next steps..."></textarea></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-g" onclick="addLog()">+ Log Session</button>
+      <button class="btn btn-r" onclick="clearLogs()">Clear All</button>
+    </div>
+  </div>
+  <div id="logContainer"><div class="empty-state">📝 No sessions logged yet. Add your first session above!</div></div>
+  <div style="margin-top:30px;">
+    <div class="section-title">Study <span>Streak</span></div>
+    <div class="streak-wrap">
+      <div class="streak-label" id="streakLabel">Loading...</div>
+      <div class="streak-grid" id="streakGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYSIS TAB -->
+<div class="tab-panel" id="tab-analysis">
+  <div class="section-title">Performance <span>Analysis</span></div>
+  <p class="section-sub">Auto-updated from your daily logs.</p>
+  <div class="analysis-grid">
+    <div class="a-card"><h3>📊 Score by Subject</h3><div id="accuracyBars"><div style="color:var(--muted);font-size:12px;">Log sessions to see data.</div></div></div>
+    <div class="a-card"><h3>⏱ Time Invested (mins)</h3><div id="timeBars"><div style="color:var(--muted);font-size:12px;">Log sessions to see data.</div></div></div>
+    <div class="a-card"><h3>💡 Smart Insights</h3><div id="insights">
+      <div class="insight-item"><div class="insight-icon">📌</div><div class="insight-text">Log <strong>3+ sessions</strong> to unlock personalised insights.</div></div>
+      <div class="insight-item"><div class="insight-icon">🎯</div><div class="insight-text">Aim for <strong>70%+ problem solve rate</strong> before moving to next topic.</div></div>
+    </div></div>
+    <div class="a-card"><h3>📅 Recent Sessions</h3><div id="weekSessions"><div style="color:var(--muted);font-size:12px;">No sessions yet.</div></div></div>
+  </div>
+</div>
+
+<!-- SYLLABUS TAB -->
+<div class="tab-panel" id="tab-syllabus">
+  <div class="section-title">Syllabus <span>Checklist</span></div>
+  <p class="section-sub">Tick topics as you master them. Saves automatically in your browser.</p>
+  <div class="syllabus-grid" id="syllabusGrid"></div>
+</div>
+
+<!-- TIPS TAB -->
+<div class="tab-panel" id="tab-tips">
+  <div class="section-title">Learning <span>Strategy</span> & Resources</div>
+  <div class="tips-grid">
+    <div class="tip-card tg"><div class="tip-icon">🐍</div><div class="tip-title">Python — Build Muscle Memory</div><div class="tip-text">Code daily without copying. Re-implement algorithms from scratch. Use Jupyter for experiments, VS Code for projects. Automate small tasks — web scraping, file processing, APIs.</div></div>
+    <div class="tip-card tb"><div class="tip-icon">🤖</div><div class="tip-title">ML — Theory + Implementation</div><div class="tip-text">For every algorithm: understand math → implement from scratch → use sklearn. Always compare train vs validation performance. Never skip cross-validation. Feature engineering beats complex models.</div></div>
+    <div class="tip-card ty"><div class="tip-icon">📊</div><div class="tip-title">Statistics — The Real Foundation</div><div class="tip-text">Most DS interviews test stats heavily. Master: distributions, hypothesis testing, A/B testing, regression assumptions, p-values. Use StatQuest YouTube — best stats resource for DS.</div></div>
+    <div class="tip-card tp"><div class="tip-icon">🗄️</div><div class="tip-title">SQL — Non-Negotiable Skill</div><div class="tip-text">Practice on Mode Analytics, StrataScratch, LeetCode SQL daily. Know window functions cold — they're in every DS interview. Write complex queries without looking up syntax.</div></div>
+    <div class="tip-card tg"><div class="tip-icon">🚀</div><div class="tip-title">Projects — Your Real Portfolio</div><div class="tip-text">3 strong GitHub projects beat 10 weak ones. Each project: problem statement → EDA → model → evaluation → deployment. Write a clear README. Deploy at least 1 project as a web app.</div></div>
+    <div class="tip-card tr"><div class="tip-icon">🔢</div><div class="tip-title">DSA — For Tech Interviews</div><div class="tip-text">Do 3–5 LeetCode problems/day. Focus: Arrays, Hash Maps, Trees, Graphs, DP. Use NeetCode 150 roadmap. Time yourself. Don't jump to solutions — struggle for 20 min first.</div></div>
+    <div class="tip-card tb"><div class="tip-icon">📚</div><div class="tip-title">Best Free Resources</div><div class="tip-text"><strong>ML:</strong> fast.ai, Andrew Ng (Coursera) · <strong>Stats:</strong> StatQuest · <strong>SQL:</strong> StrataScratch, Mode · <strong>DL:</strong> 3Blue1Brown, PyTorch docs · <strong>System Design:</strong> ByteByteGo · <strong>DSA:</strong> NeetCode, LeetCode</div></div>
+    <div class="tip-card ty"><div class="tip-icon">⏱</div><div class="tip-title">Daily 4–5 Hour Routine</div><div class="tip-text"><strong>7–8am:</strong> DSA / LeetCode (60 min) · <strong>9–10:30am:</strong> ML/DL concept + code (90 min) · <strong>11:30–12:30:</strong> SQL / Stats (60 min) · <strong>2–3pm:</strong> Project work (60 min) · <strong>4–4:30pm:</strong> Paper / blog / revision (30 min)</div></div>
+  </div>
+</div>
+
+<!-- CUSTOM PLAN TAB -->
+<div class="tab-panel" id="tab-custom">
+  <div class="section-title">✏️ <span>Custom</span> Day Plan</div>
+  <p class="section-sub">Build your own daily study plan. Add tasks, set durations, assign priorities, and tick off as you go. All data saves automatically.</p>
+  <div class="tracker-form" style="margin-bottom:20px;">
+    <div class="form-row">
+      <div><label>Date</label><input type="date" id="cpDate"></div>
+      <div><label>Subject</label>
+        <select id="cpSubject">
+          <option value="Python">🐍 Python / Coding</option>
+          <option value="Machine Learning">🤖 Machine Learning</option>
+          <option value="Statistics">📊 Statistics & Math</option>
+          <option value="SQL & Databases">🗄️ SQL & Databases</option>
+          <option value="Deep Learning">🧠 Deep Learning</option>
+          <option value="Data Engineering">⚙️ Data Engineering</option>
+          <option value="System Design">🏗️ System Design</option>
+          <option value="DSA">🔢 DSA / Algorithms</option>
+          <option value="Cloud & DevOps">☁️ Cloud & DevOps</option>
+          <option value="Project Work">🚀 Project Work</option>
+          <option value="Revision">🔄 Revision</option>
+          <option value="Other">📌 Other</option>
+        </select>
+      </div>
+      <div><label>Task / Topic</label><input type="text" id="cpTask" placeholder="e.g. Implement Random Forest from scratch"></div>
+    </div>
+    <div class="form-row">
+      <div><label>Duration (min)</label><input type="number" id="cpDuration" min="5" placeholder="e.g. 60"></div>
+      <div><label>Time Slot</label><input type="text" id="cpSlot" placeholder="e.g. 9:00 AM – 10:00 AM"></div>
+      <div><label>Priority</label>
+        <select id="cpPriority">
+          <option value="HIGH">🔴 High</option>
+          <option value="MED" selected>🟡 Medium</option>
+          <option value="LOW">🟢 Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div style="grid-column:1/-1;"><label>Notes</label><input type="text" id="cpNotes" placeholder="Resources, links, or goals for this task..."></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-g" onclick="cpAdd()">+ Add Task</button>
+      <button class="btn" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);" onclick="cpClearDay()">Clear Day</button>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+    <button onclick="cpNavDate(-1)" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:4px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;">← Prev</button>
+    <span id="cpViewDateLabel" style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;"></span>
+    <button onclick="cpNavDate(1)" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:4px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;">Next →</button>
+    <div id="cpDayProgress" style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);"></div>
+  </div>
+  <div id="cpTaskList"><div class="empty-state">No tasks for this day yet. Add your first task above!</div></div>
+</div>
+
+<!-- JOB TRACKER TAB -->
+<div class="tab-panel" id="tab-jobs">
+  <div class="section-title">💼 Job Application <span>Tracker</span></div>
+  <p class="section-sub">Log every application — company, role, resume used, status. Never lose track of where you applied.</p>
+
+  <!-- Summary stats -->
+  <div class="job-stats">
+    <div class="job-stat js-total"><div class="js-lbl">Total Applied</div><div class="js-val" id="jTotal">0</div></div>
+    <div class="job-stat js-int"><div class="js-lbl">Interviews</div><div class="js-val" id="jInt">0</div></div>
+    <div class="job-stat js-offer"><div class="js-lbl">Offers</div><div class="js-val" id="jOffer">0</div></div>
+    <div class="job-stat js-rej"><div class="js-lbl">Rejected</div><div class="js-val" id="jRej">0</div></div>
+    <div class="job-stat" style="--c:var(--muted)"><div class="js-lbl" style="border-top:2px solid var(--muted);position:absolute;top:0;left:0;right:0;height:2px;background:var(--muted);"></div><div class="js-lbl">Ghosted</div><div class="js-val" id="jGhost">0</div></div>
+  </div>
+
+  <!-- Add Application Form -->
+  <div class="tracker-form" style="margin-bottom:24px;">
+    <div class="form-row">
+      <div><label>Date Applied</label><input type="date" id="jDate"></div>
+      <div><label>Company Name</label><input type="text" id="jCompany" placeholder="e.g. Google, Infosys, Zepto"></div>
+      <div><label>Job Role / Title</label><input type="text" id="jRole" placeholder="e.g. Data Scientist, ML Engineer"></div>
+    </div>
+    <div class="form-row">
+      <div><label>Resume Used</label><input type="text" id="jResume" placeholder="e.g. Resume_DS_v3.pdf"></div>
+      <div><label>Job Source</label>
+        <select id="jSource">
+          <option value="LinkedIn">LinkedIn</option>
+          <option value="Naukri">Naukri</option>
+          <option value="Indeed">Indeed</option>
+          <option value="Company Website">Company Website</option>
+          <option value="Referral">Referral</option>
+          <option value="Internshala">Internshala</option>
+          <option value="Unstop">Unstop</option>
+          <option value="Email">Email / Cold Outreach</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div><label>Status</label>
+        <select id="jStatus">
+          <option value="applied">Applied</option>
+          <option value="interview">Interview Scheduled</option>
+          <option value="offer">Offer Received</option>
+          <option value="rejected">Rejected</option>
+          <option value="ghosted">Ghosted</option>
+          <option value="withdrawn">Withdrawn</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div><label>Job Location</label><input type="text" id="jLocation" placeholder="e.g. Bangalore (Remote)"></div>
+      <div><label>Job URL / JD Link</label><input type="text" id="jUrl" placeholder="https://..."></div>
+      <div><label>Expected CTC / Salary</label><input type="text" id="jCtc" placeholder="e.g. 8–12 LPA"></div>
+    </div>
+    <div class="form-row">
+      <div style="grid-column:1/-1;"><label>Notes / Next Steps</label><textarea id="jNotes" rows="2" placeholder="Interview round, recruiter name, follow-up date, feedback received..."></textarea></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-g" onclick="jAdd()">+ Log Application</button>
+      <button class="btn btn-r" onclick="jClearAll()">Clear All</button>
+    </div>
+  </div>
+
+  <!-- Filters + Search -->
+  <div class="job-filters">
+    <button class="filter-btn active" onclick="jSetFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="jSetFilter('applied',this)">Applied</button>
+    <button class="filter-btn" onclick="jSetFilter('interview',this)">Interview</button>
+    <button class="filter-btn" onclick="jSetFilter('offer',this)">Offer</button>
+    <button class="filter-btn" onclick="jSetFilter('rejected',this)">Rejected</button>
+    <button class="filter-btn" onclick="jSetFilter('ghosted',this)">Ghosted</button>
+    <input class="search-input" type="text" id="jSearch" placeholder="🔍 Search company or role..." oninput="jRender()">
+  </div>
+
+  <!-- Applications List -->
+  <div id="jList"><div class="empty-state">💼 No applications logged yet.<br>Start tracking your first job application above!</div></div>
+</div>
+
+</div><!-- /container -->
+<!-- ADVANCED TRACKING TAB -->
+<div class="tab-panel" id="tab-advanced">
+  <div class="section-title">📈 Advanced <span>Tracking</span></div>
+  <p class="section-sub">Visual analytics built from your study logs — heatmap, trend charts, accuracy over time.</p>
+
+  <div class="adv-grid">
+
+    <!-- Streak summary -->
+    <div class="adv-card" style="grid-column:span 1;">
+      <div class="adv-card-title">🔥 Study <span>Streaks</span></div>
+      <div style="display:flex;gap:28px;align-items:flex-end;flex-wrap:wrap;">
+        <div>
+          <div class="streak-number" id="advCurrentStreak">0</div>
+          <div class="streak-sub">Current Streak</div>
+        </div>
+        <div>
+          <div class="streak-number" style="font-size:32px;color:var(--accent3);" id="advLongestStreak">0</div>
+          <div class="streak-sub">Longest Streak</div>
+        </div>
+        <div>
+          <div class="streak-number" style="font-size:32px;color:var(--accent2);" id="advTotalDays">0</div>
+          <div class="streak-sub">Total Days</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Study hours bar chart — last 14 days -->
+    <div class="adv-card">
+      <div class="adv-card-title">⏱ Study Hours — <span>Last 14 Days</span></div>
+      <div style="position:relative;">
+        <div class="chart-bars" id="hoursChart"></div>
+      </div>
+    </div>
+
+    <!-- Accuracy trend — last 10 sessions -->
+    <div class="adv-card">
+      <div class="adv-card-title">🎯 Accuracy <span>Trend</span></div>
+      <div class="trend-line">
+        <svg class="trend-svg" id="accuracyTrendSvg" viewBox="0 0 300 100" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="adv-legend" id="trendLegend"></div>
+    </div>
+
+    <!-- Subject time breakdown -->
+    <div class="adv-card">
+      <div class="adv-card-title">📊 Time by <span>Subject</span></div>
+      <div class="chart-bars" id="subjectChart"></div>
+      <div class="adv-legend" id="subjectLegend"></div>
+    </div>
+
+  </div>
+
+  <!-- Activity heatmap — full width -->
+  <div class="adv-card" style="margin-bottom:24px;">
+    <div class="adv-card-title">🗓️ Activity <span>Heatmap</span> — Last 12 Months</div>
+    <div style="display:flex;gap:6px;align-items:flex-start;overflow-x:auto;padding-bottom:8px;">
+      <div class="hm-day-labels">
+        <span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span>
+      </div>
+      <div>
+        <div class="hm-months" id="hmMonthLabels"></div>
+        <div class="heatmap-grid" id="heatmapGrid"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">
+      <span>Less</span>
+      <div class="hm-cell hm-0"></div>
+      <div class="hm-cell hm-1"></div>
+      <div class="hm-cell hm-2"></div>
+      <div class="hm-cell hm-3"></div>
+      <div class="hm-cell hm-4"></div>
+      <span>More</span>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /page-with-sidebar -->
+<script>
+const subjectColors={'Python':'var(--python)','Machine Learning':'var(--ml)','Statistics':'var(--stats)','SQL & Databases':'var(--sql)','Deep Learning':'var(--ml)','Data Engineering':'var(--tools)','System Design':'var(--tools)','DSA':'var(--python)','Cloud & DevOps':'var(--tools)','Project Work':'var(--project)','Revision':'var(--muted)','Other':'var(--accent2)'};
+const prioColors={'HIGH':'var(--accent4)','MED':'var(--accent3)','LOW':'var(--accent)'};
+let logs=JSON.parse(localStorage.getItem('ds_studyLogs')||'[]');
+
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='analysis') renderAnalysis();
+  if(id==='advanced') advRender();
+}
+
+document.getElementById('logDate').valueAsDate=new Date();
+
+function addLog(){
+  const date=document.getElementById('logDate').value;
+  const subject=document.getElementById('logSubject').value;
+  const topic=document.getElementById('logTopic').value.trim();
+  const attempted=parseInt(document.getElementById('logAttempted').value)||0;
+  const correct=parseInt(document.getElementById('logCorrect').value)||0;
+  const time=parseInt(document.getElementById('logTime').value)||0;
+  const conf=document.getElementById('logConf').value;
+  const notes=document.getElementById('logNotes').value.trim();
+  if(!date||!subject||!topic){alert('Please fill Date, Subject, and Topic.');return;}
+  logs.unshift({date,subject,topic,attempted,correct,time,conf,notes,id:Date.now()});
+  localStorage.setItem('ds_studyLogs',JSON.stringify(logs));
+  renderLogs();updateStats();updateTodayTotal();
+  document.getElementById('logTopic').value='';
+  document.getElementById('logAttempted').value='';
+  document.getElementById('logCorrect').value='';
+  document.getElementById('logTime').value='';
+  document.getElementById('logNotes').value='';
+}
+function deleteLog(id){logs=logs.filter(l=>l.id!==id);localStorage.setItem('ds_studyLogs',JSON.stringify(logs));renderLogs();updateStats();}
+function clearLogs(){if(!confirm('Clear all logs?'))return;logs=[];localStorage.setItem('ds_studyLogs','[]');renderLogs();updateStats();}
+function getC(p){return p>=75?'s-hi':p>=50?'s-mid':'s-lo';}
+
+function renderLogs(){
+  const c=document.getElementById('logContainer');
+  if(!logs.length){c.innerHTML='<div class="empty-state">📝 No sessions yet. Log your first session above!</div>';return;}
+  let h='<div class="log-list">';
+  logs.forEach(l=>{
+    const pct=l.attempted>0?Math.round(l.correct/l.attempted*100):0;
+    const col=subjectColors[l.subject]||'var(--accent2)';
+    h+=`<div class="log-entry">
+      <div class="log-dot" style="background:${col}"></div>
+      <div class="log-main"><div class="log-subject">${l.subject}</div>
+      <div class="log-meta">${l.topic} &nbsp;·&nbsp; ${l.date} &nbsp;·&nbsp; Understanding: ${'⭐'.repeat(parseInt(l.conf))}${l.notes?' &nbsp;·&nbsp; '+l.notes.substring(0,40)+'…':''}</div></div>
+      <div class="log-right"><div class="log-score ${getC(pct)}">${l.attempted>0?pct+'%':'—'}</div>
+      <div class="log-time">${l.correct}/${l.attempted} &nbsp;|&nbsp; ${l.time} min</div></div>
+      <button class="log-del" onclick="deleteLog(${l.id})">✕</button>
+    </div>`;
+  });
+  h+='</div>';c.innerHTML=h;
+}
+
+function updateStats(){
+  document.getElementById('statDays').textContent=new Set(logs.map(l=>l.date)).size;
+  const wq=logs.filter(l=>l.attempted>0);
+  document.getElementById('statAcc').textContent=wq.length?Math.round(wq.reduce((s,l)=>s+(l.correct/l.attempted*100),0)/wq.length)+'%':'—';
+  document.getElementById('statTopics').textContent=document.querySelectorAll('.topic.checked').length;
+  const bs={};wq.forEach(l=>{if(!bs[l.subject])bs[l.subject]={c:0,a:0};bs[l.subject].c+=l.correct;bs[l.subject].a+=l.attempted;});
+  let w='—',mp=101;Object.entries(bs).forEach(([s,v])=>{const p=v.c/v.a*100;if(p<mp){mp=p;w=s.split(' ')[0];}});
+  document.getElementById('statWeak').textContent=w;
+}
+
+function renderAnalysis(){
+  const subjects=Object.keys(subjectColors).filter(s=>s!=='Revision'&&s!=='Other');
+  const bs={};subjects.forEach(s=>bs[s]={c:0,a:0,t:0});
+  logs.forEach(l=>{if(bs[l.subject]){bs[l.subject].c+=l.correct;bs[l.subject].a+=l.attempted;bs[l.subject].t+=l.time;}});
+  const maxT=Math.max(...subjects.map(s=>bs[s].t),1);
+  let aH='',tH='';
+  subjects.forEach(s=>{
+    const d=bs[s],pct=d.a>0?Math.round(d.c/d.a*100):0,tp=Math.round(d.t/maxT*100),col=subjectColors[s]||'var(--accent2)',short=s.split(' ')[0];
+    aH+=`<div class="bar-row"><div class="bar-top"><span>${short}</span><span class="bar-pct">${d.a>0?pct+'%':'No data'}</span></div><div class="bar-track"><div class="bar-fill" style="width:${d.a>0?pct:0}%;background:${col}"></div></div></div>`;
+    tH+=`<div class="bar-row"><div class="bar-top"><span>${short}</span><span class="bar-pct">${d.t} min</span></div><div class="bar-track"><div class="bar-fill" style="width:${tp}%;background:${col}"></div></div></div>`;
+  });
+  document.getElementById('accuracyBars').innerHTML=aH||'<div style="color:var(--muted);font-size:12px;">No data yet.</div>';
+  document.getElementById('timeBars').innerHTML=tH||'<div style="color:var(--muted);font-size:12px;">No data yet.</div>';
+  const wq=logs.filter(l=>l.attempted>0);
+  let iH='';
+  if(wq.length<3){iH='<div class="insight-item"><div class="insight-icon">📌</div><div class="insight-text">Log <strong>3+ sessions</strong> to unlock insights.</div></div>';}
+  else{
+    let ws='',mp=101,ss='',mx=-1;
+    subjects.forEach(s=>{const d=bs[s];if(d.a>0){const p=d.c/d.a*100;if(p<mp){mp=p;ws=s;}if(p>mx){mx=p;ss=s;}}});
+    const avg=Math.round(wq.reduce((s,l)=>s+(l.correct/l.attempted*100),0)/wq.length);
+    iH=`<div class="insight-item"><div class="insight-icon">⚠️</div><div class="insight-text">Needs work: <strong>${ws}</strong> at ${Math.round(mp)}%.</div></div>
+    <div class="insight-item"><div class="insight-icon">🏆</div><div class="insight-text">Strongest: <strong>${ss}</strong> at ${Math.round(mx)}%.</div></div>
+    <div class="insight-item"><div class="insight-icon">📈</div><div class="insight-text">Avg: <strong>${avg}%</strong>. ${avg>=75?'Excellent!':avg>=55?'Good — push to 75%+.':'Revise fundamentals.'}</div></div>
+    <div class="insight-item"><div class="insight-icon">⏳</div><div class="insight-text">Total: <strong>${logs.reduce((s,l)=>s+l.time,0)} min</strong> across ${logs.length} sessions.</div></div>`;
+  }
+  document.getElementById('insights').innerHTML=iH;
+  const recent=logs.slice(0,5);
+  let rH=recent.length?'<div class="log-list">':'<div style="color:var(--muted);font-size:12px;">None yet.</div>';
+  recent.forEach(l=>{const pct=l.attempted>0?Math.round(l.correct/l.attempted*100):0;rH+=`<div class="log-entry" style="padding:10px 14px;"><div class="log-dot" style="background:${subjectColors[l.subject]||'var(--muted)'}"></div><div class="log-main"><div class="log-subject" style="font-size:12px;">${l.subject}</div><div class="log-meta">${l.topic} · ${l.date}</div></div><div class="log-right"><div class="log-score ${getC(pct)}" style="font-size:16px;">${l.attempted>0?pct+'%':'—'}</div></div></div>`;});
+  if(recent.length)rH+='</div>';
+  document.getElementById('weekSessions').innerHTML=rH;
+}
+
+function buildStreak(){
+  const now=new Date();const y=now.getFullYear(),m=now.getMonth();
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('streakLabel').textContent=months[m]+' '+y+' — Click to mark days studied';
+  const dim=new Date(y,m+1,0).getDate(),today=now.getDate();
+  const streak=JSON.parse(localStorage.getItem('ds_streak')||'[]');
+  let h='';
+  for(let d=1;d<=dim;d++){const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const done=streak.includes(ds),isTd=d===today;h+=`<div class="s-day${done?' done':''}${isTd?' today':''}" onclick="toggleStreak('${ds}',this)">${d}</div>`;}
+  document.getElementById('streakGrid').innerHTML=h;
+}
+function toggleStreak(ds,el){let s=JSON.parse(localStorage.getItem('ds_streak')||'[]');if(s.includes(ds))s=s.filter(d=>d!==ds);else s.push(ds);localStorage.setItem('ds_streak',JSON.stringify(s));el.classList.toggle('done');}
+
+const SYLLABUS=[
+  {subject:'🐍 Python & Coding',color:'var(--python)',topics:[
+    {t:'OOP — Classes, Inheritance, Decorators',p:'ph'},{t:'Data Structures: List/Dict/Set/Tuple',p:'ph'},{t:'File I/O, Exception Handling',p:'pm'},
+    {t:'NumPy — Arrays, Broadcasting',p:'ph'},{t:'Pandas — DataFrames, Groupby, Merge',p:'ph'},{t:'Matplotlib & Seaborn Visualisation',p:'pm'},
+    {t:'Web Scraping: BeautifulSoup / Scrapy',p:'pl'},{t:'REST APIs with Requests / FastAPI',p:'pm'},
+  ]},
+  {subject:'🤖 Machine Learning',color:'var(--ml)',topics:[
+    {t:'Linear & Logistic Regression',p:'ph'},{t:'Decision Trees & Random Forest',p:'ph'},{t:'SVM & KNN',p:'pm'},
+    {t:'Gradient Boosting: XGBoost, LightGBM',p:'ph'},{t:'Clustering: K-Means, DBSCAN',p:'pm'},{t:'PCA & Dimensionality Reduction',p:'pm'},
+    {t:'Model Evaluation & Cross-Validation',p:'ph'},{t:'Feature Engineering & Selection',p:'ph'},{t:'Hyperparameter Tuning: GridSearch, Optuna',p:'pm'},
+  ]},
+  {subject:'📊 Statistics & Math',color:'var(--stats)',topics:[
+    {t:'Probability & Distributions',p:'ph'},{t:'Hypothesis Testing & p-values',p:'ph'},{t:'A/B Testing',p:'ph'},
+    {t:'Linear Algebra: Matrices, Eigenvalues',p:'pm'},{t:'Calculus: Gradients, Chain Rule',p:'pm'},{t:'Bayesian Statistics',p:'pm'},
+    {t:'Time Series: ARIMA, Stationarity',p:'pm'},{t:'Causal Inference Basics',p:'pl'},
+  ]},
+  {subject:'🗄️ SQL & Databases',color:'var(--sql)',topics:[
+    {t:'SELECT, WHERE, GROUP BY, HAVING',p:'ph'},{t:'INNER / LEFT / OUTER Joins',p:'ph'},{t:'Window Functions: ROW_NUMBER, RANK, LAG',p:'ph'},
+    {t:'CTEs & Subqueries',p:'ph'},{t:'Indexing & Query Optimisation',p:'pm'},{t:'NoSQL: MongoDB Basics',p:'pl'},
+    {t:'Data Warehousing: Star vs Snowflake',p:'pm'},{t:'BigQuery / Redshift',p:'pl'},
+  ]},
+  {subject:'🧠 Deep Learning & NLP',color:'var(--ml)',topics:[
+    {t:'Neural Networks & Backpropagation',p:'ph'},{t:'CNNs for Image Classification',p:'pm'},{t:'RNNs & LSTMs',p:'pm'},
+    {t:'Transformers & Attention Mechanism',p:'ph'},{t:'HuggingFace Fine-tuning',p:'ph'},{t:'NLP: Tokenisation, Embeddings, BERT',p:'ph'},
+    {t:'PyTorch Training Loop',p:'ph'},{t:'LLM Prompting & RAG',p:'pm'},
+  ]},
+  {subject:'☁️ Tools, Cloud & MLOps',color:'var(--tools)',topics:[
+    {t:'Git & GitHub: Branching, PRs',p:'ph'},{t:'Docker & Containers',p:'pm'},{t:'AWS S3 / EC2 / SageMaker',p:'pm'},
+    {t:'GCP BigQuery / Vertex AI',p:'pl'},{t:'MLflow Experiment Tracking',p:'pm'},{t:'Apache Airflow Pipelines',p:'pm'},
+    {t:'Apache Spark Intro',p:'pl'},{t:'CI/CD for ML: GitHub Actions',p:'pl'},
+  ]},
+  {subject:'🔢 DSA / Algorithms',color:'var(--python)',topics:[
+    {t:'Arrays & Hash Maps',p:'ph'},{t:'Two Pointers & Sliding Window',p:'ph'},{t:'Recursion & Backtracking',p:'pm'},
+    {t:'Trees & Graphs: BFS / DFS',p:'ph'},{t:'Dynamic Programming',p:'ph'},{t:'Binary Search',p:'pm'},
+    {t:'Heaps & Priority Queue',p:'pm'},{t:'System Design: LLD & HLD',p:'ph'},
+  ]},
+];
+
+function buildSyllabus(){
+  const saved=JSON.parse(localStorage.getItem('ds_syllabus')||'[]');
+  let h='';
+  SYLLABUS.forEach(sec=>{
+    h+=`<div class="syl-card"><div class="syl-header"><span style="width:10px;height:10px;border-radius:50%;background:${sec.color};display:inline-block;flex-shrink:0;"></span>${sec.subject}</div><div class="syl-body">`;
+    sec.topics.forEach(tp=>{
+      const key=sec.subject+'||'+tp.t,chk=saved.includes(key);
+      h+=`<div class="topic${chk?' checked':''}" onclick="toggleTopic('${key}',this)"><input type="checkbox" ${chk?'checked':''} onclick="event.stopPropagation();toggleTopic('${key}',this.closest('.topic'))"><span class="topic-label">${tp.t}</span><span class="pbadge ${tp.p}">${tp.p==='ph'?'HIGH':tp.p==='pm'?'MED':'LOW'}</span></div>`;
+    });
+    h+='</div></div>';
+  });
+  document.getElementById('syllabusGrid').innerHTML=h;
+}
+function toggleTopic(key,el){
+  let s=JSON.parse(localStorage.getItem('ds_syllabus')||'[]');
+  const cb=el.querySelector('input[type=checkbox]');
+  if(s.includes(key)){s=s.filter(k=>k!==key);el.classList.remove('checked');if(cb)cb.checked=false;}
+  else{s.push(key);el.classList.add('checked');if(cb)cb.checked=true;}
+  localStorage.setItem('ds_syllabus',JSON.stringify(s));updateStats();
+}
+
+// Timer — timestamp-based so minimize/tab-switch never loses time
+let timerRunning = false;
+let timerInterval = null;
+let timerStartTime = null;
+let timerAccumulated = 0;
+
+function pad(n){return String(n).padStart(2,'0');}
+
+function timerGetElapsed(){
+  let total = timerAccumulated;
+  if(timerRunning && timerStartTime) total += Date.now() - timerStartTime;
+  return Math.floor(total / 1000);
+}
+
+function timerTick(){
+  const sec = timerGetElapsed();
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+  document.getElementById('timerDisplay').textContent=pad(h)+':'+pad(m)+':'+pad(s);
+}
+
+function timerToggle(){
+  const btn=document.getElementById('timerPlayBtn');
+  const disp=document.getElementById('timerDisplay');
+  const status=document.getElementById('timerStatus');
+  if(!timerRunning){
+    timerRunning=true;
+    timerStartTime=Date.now();
+    timerInterval=setInterval(timerTick,200);
+    btn.textContent='⏸';
+    btn.className='t-btn pause-active';
+    disp.className='timer-display running';
+    status.textContent='Running...';
+    status.className='timer-status on';
+  } else {
+    timerAccumulated += Date.now() - timerStartTime;
+    timerRunning=false;
+    timerStartTime=null;
+    clearInterval(timerInterval);
+    btn.textContent='▶';
+    btn.className='t-btn play';
+    disp.className='timer-display paused';
+    status.textContent='Paused';
+    status.className='timer-status';
+  }
+}
+
+function timerReset(){
+  timerRunning=false;
+  timerStartTime=null;
+  timerAccumulated=0;
+  clearInterval(timerInterval);
+  const btn=document.getElementById('timerPlayBtn');
+  const disp=document.getElementById('timerDisplay');
+  const status=document.getElementById('timerStatus');
+  disp.textContent='00:00:00';
+  disp.className='timer-display';
+  btn.textContent='▶';
+  btn.className='t-btn play';
+  status.textContent='Stopped';
+  status.className='timer-status';
+}
+
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden && timerRunning) timerTick();
+});
+
+function updateTodayTotal(){const today=new Date().toISOString().slice(0,10);const total=logs.filter(l=>l.date===today).reduce((s,l)=>s+l.time,0);document.getElementById('timerTodayTotal').textContent=total+' min';}
+
+// CUSTOM PLAN
+let cpViewDate=new Date().toISOString().slice(0,10);
+document.getElementById('cpDate').valueAsDate=new Date();
+function cpAdd(){
+  const date=document.getElementById('cpDate').value,subject=document.getElementById('cpSubject').value,task=document.getElementById('cpTask').value.trim();
+  const duration=parseInt(document.getElementById('cpDuration').value)||0,slot=document.getElementById('cpSlot').value.trim();
+  const priority=document.getElementById('cpPriority').value,notes=document.getElementById('cpNotes').value.trim();
+  if(!date||!task){alert('Please set a Date and Task.');return;}
+  let plans=JSON.parse(localStorage.getItem('ds_customPlan')||'{}');
+  if(!plans[date])plans[date]=[];
+  plans[date].push({id:Date.now(),subject,task,duration,slot,priority,notes,done:false});
+  localStorage.setItem('ds_customPlan',JSON.stringify(plans));
+  cpViewDate=date;cpRender();
+  document.getElementById('cpTask').value='';document.getElementById('cpDuration').value='';document.getElementById('cpSlot').value='';document.getElementById('cpNotes').value='';
+}
+function cpToggleDone(date,id){let plans=JSON.parse(localStorage.getItem('ds_customPlan')||'{}');if(plans[date])plans[date]=plans[date].map(t=>t.id===id?{...t,done:!t.done}:t);localStorage.setItem('ds_customPlan',JSON.stringify(plans));cpRender();}
+function cpDelete(date,id){let plans=JSON.parse(localStorage.getItem('ds_customPlan')||'{}');if(plans[date])plans[date]=plans[date].filter(t=>t.id!==id);localStorage.setItem('ds_customPlan',JSON.stringify(plans));cpRender();}
+function cpClearDay(){if(!confirm('Clear all tasks for '+cpViewDate+'?'))return;let plans=JSON.parse(localStorage.getItem('ds_customPlan')||'{}');delete plans[cpViewDate];localStorage.setItem('ds_customPlan',JSON.stringify(plans));cpRender();}
+function cpNavDate(dir){const d=new Date(cpViewDate);d.setDate(d.getDate()+dir);cpViewDate=d.toISOString().slice(0,10);cpRender();}
+function cpRender(){
+  const plans=JSON.parse(localStorage.getItem('ds_customPlan')||'{}'),tasks=plans[cpViewDate]||[];
+  document.getElementById('cpViewDateLabel').textContent=new Date(cpViewDate+'T00:00:00').toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const done=tasks.filter(t=>t.done).length,total=tasks.length,totalMin=tasks.reduce((s,t)=>s+t.duration,0);
+  document.getElementById('cpDayProgress').innerHTML=total?`<span style="color:var(--accent)">${done}/${total} done</span> &nbsp;·&nbsp; ${totalMin} min planned`:'';
+  if(!tasks.length){document.getElementById('cpTaskList').innerHTML='<div class="empty-state">No tasks for this day. Add tasks above or navigate to another day.</div>';return;}
+  let h='<div style="display:flex;flex-direction:column;gap:10px;">';
+  tasks.forEach(t=>{
+    const col=subjectColors[t.subject]||'var(--accent2)',pc=prioColors[t.priority]||'var(--muted)';
+    h+=`<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${col};border-radius:6px;padding:14px 18px;display:flex;gap:14px;align-items:flex-start;${t.done?'opacity:.5':''}">
+      <input type="checkbox" ${t.done?'checked':''} style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;cursor:pointer;" onchange="cpToggleDone('${cpViewDate}',${t.id})">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+          <span style="font-weight:700;font-size:13px;${t.done?'text-decoration:line-through;color:var(--muted)':''}">${t.task}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:2px;border:1px solid ${pc};color:${pc};background:${pc}18;">${t.priority}</span>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);">
+          <span style="color:${col};">${t.subject}</span>
+          ${t.slot?`<span>🕐 ${t.slot}</span>`:''}
+          ${t.duration?`<span>⏱ ${t.duration} min</span>`:''}
+          ${t.notes?`<span>📌 ${t.notes}</span>`:''}
+        </div>
+      </div>
+      <button onclick="cpDelete('${cpViewDate}',${t.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;flex-shrink:0;" onmouseover="this.style.color='var(--accent4)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+    </div>`;
+  });
+  h+='</div>';document.getElementById('cpTaskList').innerHTML=h;
+}
+
+renderLogs();updateStats();buildStreak();buildSyllabus();updateTodayTotal();cpRender();
+
+// ── JOB TRACKER ──
+let jobs = JSON.parse(localStorage.getItem('ds_jobs') || '[]');
+let jFilter = 'all';
+
+const statusLabels = {applied:'Applied',interview:'Interview',offer:'Offer',rejected:'Rejected',ghosted:'Ghosted',withdrawn:'Withdrawn'};
+const statusDot = {applied:'st-applied',interview:'st-interview',offer:'st-offer',rejected:'st-rejected',ghosted:'st-ghosted',withdrawn:'st-withdrawn'};
+const statusClass = {applied:'status-applied',interview:'status-interview',offer:'status-offer',rejected:'status-rejected',ghosted:'status-ghosted',withdrawn:'status-withdrawn'};
+const sourceIcons = {LinkedIn:'🔗',Naukri:'📋',Indeed:'🔎','Company Website':'🌐',Referral:'🤝',Internshala:'🎓',Unstop:'🏆',Email:'📧',Other:'📌'};
+
+document.getElementById('jDate').valueAsDate = new Date();
+
+function jAdd(){
+  const date = document.getElementById('jDate').value;
+  const company = document.getElementById('jCompany').value.trim();
+  const role = document.getElementById('jRole').value.trim();
+  const resume = document.getElementById('jResume').value.trim();
+  const source = document.getElementById('jSource').value;
+  const status = document.getElementById('jStatus').value;
+  const location = document.getElementById('jLocation').value.trim();
+  const url = document.getElementById('jUrl').value.trim();
+  const ctc = document.getElementById('jCtc').value.trim();
+  const notes = document.getElementById('jNotes').value.trim();
+  if(!date || !company || !role){ alert('Please fill Date, Company, and Job Role.'); return; }
+  jobs.unshift({id:Date.now(),date,company,role,resume,source,status,location,url,ctc,notes});
+  localStorage.setItem('ds_jobs', JSON.stringify(jobs));
+  jRender(); jUpdateStats();
+  ['jCompany','jRole','jResume','jLocation','jUrl','jCtc','jNotes'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('jStatus').value = 'applied';
+}
+
+function jDelete(id){
+  if(!confirm('Delete this application?')) return;
+  jobs = jobs.filter(j => j.id !== id);
+  localStorage.setItem('ds_jobs', JSON.stringify(jobs));
+  jRender(); jUpdateStats();
+}
+
+function jUpdateStatus(id, newStatus){
+  jobs = jobs.map(j => j.id === id ? {...j, status: newStatus} : j);
+  localStorage.setItem('ds_jobs', JSON.stringify(jobs));
+  jRender(); jUpdateStats();
+}
+
+function jClearAll(){
+  if(!confirm('Clear ALL job applications? This cannot be undone.')) return;
+  jobs = [];
+  localStorage.setItem('ds_jobs', '[]');
+  jRender(); jUpdateStats();
+}
+
+function jSetFilter(f, btn){
+  jFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  jRender();
+}
+
+function jUpdateStats(){
+  document.getElementById('jTotal').textContent = jobs.length;
+  document.getElementById('jInt').textContent = jobs.filter(j=>j.status==='interview').length;
+  document.getElementById('jOffer').textContent = jobs.filter(j=>j.status==='offer').length;
+  document.getElementById('jRej').textContent = jobs.filter(j=>j.status==='rejected').length;
+  document.getElementById('jGhost').textContent = jobs.filter(j=>j.status==='ghosted').length;
+}
+
+function jRender(){
+  const query = document.getElementById('jSearch').value.toLowerCase();
+  let filtered = jobs.filter(j => {
+    const matchFilter = jFilter === 'all' || j.status === jFilter;
+    const matchSearch = !query || j.company.toLowerCase().includes(query) || j.role.toLowerCase().includes(query) || (j.resume||'').toLowerCase().includes(query);
+    return matchFilter && matchSearch;
+  });
+
+  const container = document.getElementById('jList');
+  if(!filtered.length){
+    container.innerHTML = '<div class="empty-state">No applications match this filter.<br>Try a different status or search term.</div>';
+    return;
+  }
+
+  let h = '<div style="display:flex;flex-direction:column;gap:12px;">';
+  filtered.forEach(j => {
+    const srcIcon = sourceIcons[j.source] || '📌';
+    const dotClass = statusDot[j.status] || 'st-applied';
+    const selClass = statusClass[j.status] || 'status-applied';
+    h += `<div class="job-card">
+      <div class="job-status-dot ${dotClass}"></div>
+      <div class="job-main">
+        <div class="job-role">${j.role}</div>
+        <div class="job-company">${j.company}</div>
+        <div class="job-meta-row">
+          <span>📅 ${j.date}</span>
+          ${j.location ? `<span>📍 ${j.location}</span>` : ''}
+          ${j.ctc ? `<span>💰 ${j.ctc}</span>` : ''}
+          <span>${srcIcon} ${j.source}</span>
+        </div>
+        ${j.resume ? `<div class="job-tags"><span class="job-tag" style="background:rgba(91,141,238,.12);color:var(--accent2);border:1px solid rgba(91,141,238,.3);">📄 ${j.resume}</span></div>` : ''}
+        ${j.notes ? `<div class="job-note">📝 ${j.notes}</div>` : ''}
+        ${j.url ? `<div style="margin-top:6px;"><a href="${j.url}" target="_blank" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);text-decoration:none;letter-spacing:.5px;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">🔗 View Job Posting →</a></div>` : ''}
+      </div>
+      <div class="job-right">
+        <select class="status-select ${selClass}" onchange="jUpdateStatus(${j.id},this.value)">
+          <option value="applied" ${j.status==='applied'?'selected':''}>Applied</option>
+          <option value="interview" ${j.status==='interview'?'selected':''}>Interview</option>
+          <option value="offer" ${j.status==='offer'?'selected':''}>Offer</option>
+          <option value="rejected" ${j.status==='rejected'?'selected':''}>Rejected</option>
+          <option value="ghosted" ${j.status==='ghosted'?'selected':''}>Ghosted</option>
+          <option value="withdrawn" ${j.status==='withdrawn'?'selected':''}>Withdrawn</option>
+        </select>
+        <div class="job-date">${j.date}</div>
+        <button class="job-del-btn" onclick="jDelete(${j.id})" title="Delete">✕</button>
+      </div>
+    </div>`;
+  });
+  h += '</div>';
+  container.innerHTML = h;
+}
+
+jRender(); jUpdateStats();
+
+// ── ADVANCED TRACKING ──────────────────────────────────────────────────
+
+function advRender(){
+  advStreaks();
+  advHoursChart();
+  advAccuracyTrend();
+  advSubjectChart();
+  advHeatmap();
+}
+
+function advStreaks(){
+  const streak = JSON.parse(localStorage.getItem('ds_streak')||'[]').sort();
+  const logDates = [...new Set(logs.map(l=>l.date))].sort();
+  const allDates = [...new Set([...streak,...logDates])].sort();
+
+  let cur=0, longest=0, tmp=0;
+  let prev=null;
+  allDates.forEach(d=>{
+    if(!prev){ tmp=1; }
+    else{
+      const diff=(new Date(d)-new Date(prev))/(1000*60*60*24);
+      tmp = diff===1 ? tmp+1 : 1;
+    }
+    if(tmp>longest) longest=tmp;
+    prev=d;
+  });
+  // check if today or yesterday is in streak for current
+  const today=new Date().toISOString().slice(0,10);
+  const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(allDates.includes(today)||allDates.includes(yesterday)){
+    // count back from most recent
+    let i=allDates.length-1, cnt=0, prevD=null;
+    while(i>=0){
+      if(!prevD){cnt=1;}
+      else{
+        const diff=(new Date(prevD)-new Date(allDates[i]))/(1000*60*60*24);
+        if(diff===1) cnt++; else break;
+      }
+      prevD=allDates[i]; i--;
+    }
+    cur=cnt;
+  }
+  document.getElementById('advCurrentStreak').textContent=cur;
+  document.getElementById('advLongestStreak').textContent=longest;
+  document.getElementById('advTotalDays').textContent=allDates.length;
+}
+
+function advHoursChart(){
+  const el=document.getElementById('hoursChart');
+  if(!el)return;
+  const days=[];
+  for(let i=13;i>=0;i--){
+    const d=new Date(Date.now()-i*86400000).toISOString().slice(0,10);
+    days.push(d);
+  }
+  const byDay={};
+  days.forEach(d=>byDay[d]=0);
+  logs.forEach(l=>{if(byDay[l.date]!==undefined) byDay[l.date]+=l.time;});
+  const max=Math.max(...Object.values(byDay),1);
+  let h='';
+  days.forEach(d=>{
+    const mins=byDay[d];
+    const pct=Math.round(mins/max*100);
+    const label=new Date(d+'T12:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'}).replace(' ','\n');
+    const shortLabel=new Date(d+'T12:00:00').toLocaleDateString('en-IN',{day:'numeric'});
+    h+=`<div class="chart-bar-wrap" title="${d}: ${mins} min">
+      <div style="flex:1;display:flex;align-items:flex-end;width:100%;">
+        <div class="chart-bar" style="height:${pct}%;background:${mins>0?'var(--accent2)':'var(--surface2)'};width:100%;"></div>
+      </div>
+      <div class="chart-bar-label">${shortLabel}</div>
+    </div>`;
+  });
+  el.innerHTML=h;
+}
+
+function advAccuracyTrend(){
+  const svg=document.getElementById('accuracyTrendSvg');
+  if(!svg)return;
+  const withQ=logs.filter(l=>l.attempted>0).slice(0,12).reverse();
+  if(withQ.length<2){svg.innerHTML='<text x="150" y="50" text-anchor="middle" fill="#5a7a9a" font-size="11" font-family="DM Mono,monospace">Log 2+ sessions to see trend</text>';return;}
+  const pts=withQ.map((l,i)=>{
+    const x=i/(withQ.length-1)*280+10;
+    const y=100-(l.correct/l.attempted*100);
+    return {x,y,acc:Math.round(l.correct/l.attempted*100),subj:l.subject.split(' ')[0],date:l.date};
+  });
+  // gradient area
+  const pathD='M'+pts.map(p=>p.x+','+p.y).join(' L');
+  const areaD=pathD+` L${pts[pts.length-1].x},100 L${pts[0].x},100 Z`;
+  let svgH=`<defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3dd9b3" stop-opacity=".3"/><stop offset="100%" stop-color="#3dd9b3" stop-opacity="0"/></linearGradient></defs>`;
+  svgH+=`<path d="${areaD}" fill="url(#tg)"/>`;
+  svgH+=`<path d="${pathD}" fill="none" stroke="#3dd9b3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  pts.forEach(p=>{
+    svgH+=`<circle cx="${p.x}" cy="${p.y}" r="3" fill="#3dd9b3" stroke="var(--surface)" stroke-width="1.5">
+      <title>${p.date} · ${p.subj} · ${p.acc}%</title></circle>`;
+  });
+  // 70% line
+  svgH+=`<line x1="0" y1="30" x2="300" y2="30" stroke="#f0c040" stroke-width="1" stroke-dasharray="4,3" opacity=".5"/>`;
+  svgH+=`<text x="295" y="28" text-anchor="end" fill="#f0c040" font-size="8" font-family="DM Mono,monospace" opacity=".7">70%</text>`;
+  svg.innerHTML=svgH;
+  document.getElementById('trendLegend').innerHTML=
+    `<div class="adv-legend-item"><div class="adv-legend-dot" style="background:var(--accent)"></div>Accuracy</div>`+
+    `<div class="adv-legend-item"><div style="width:16px;height:1px;background:var(--accent3);border-top:1px dashed var(--accent3);margin:4px 0;"></div>70% target</div>`;
+}
+
+function advSubjectChart(){
+  const el=document.getElementById('subjectChart');
+  if(!el)return;
+  const subs=Object.keys(subjectColors).filter(s=>s!=='Revision'&&s!=='Other');
+  const bySubj={};
+  subs.forEach(s=>bySubj[s]=0);
+  logs.forEach(l=>{if(bySubj[l.subject]!==undefined) bySubj[l.subject]+=l.time;});
+  const max=Math.max(...Object.values(bySubj),1);
+  let h='', legH='';
+  subs.forEach(s=>{
+    const mins=bySubj[s];
+    if(mins===0) return;
+    const pct=Math.round(mins/max*100);
+    const col=subjectColors[s]||'var(--accent2)';
+    const short=s.split(' ')[0];
+    h+=`<div class="chart-bar-wrap" title="${s}: ${mins} min">
+      <div style="flex:1;display:flex;align-items:flex-end;width:100%;">
+        <div class="chart-bar" style="height:${pct}%;background:${col};width:100%;"></div>
+      </div>
+      <div class="chart-bar-label">${short}</div>
+    </div>`;
+    legH+=`<div class="adv-legend-item"><div class="adv-legend-dot" style="background:${col}"></div>${short}: ${mins}m</div>`;
+  });
+  el.innerHTML=h||'<div style="color:var(--muted);font-size:12px;padding:20px 0;">Log sessions to see subject breakdown.</div>';
+  document.getElementById('subjectLegend').innerHTML=legH;
+}
+
+function advHeatmap(){
+  const grid=document.getElementById('heatmapGrid');
+  const monthLabels=document.getElementById('hmMonthLabels');
+  if(!grid)return;
+
+  const logDates=new Set(logs.map(l=>l.date));
+  const streakDates=new Set(JSON.parse(localStorage.getItem('ds_streak')||'[]'));
+  const logMinutes={};
+  logs.forEach(l=>{logMinutes[l.date]=(logMinutes[l.date]||0)+l.time;});
+
+  const today=new Date();
+  const endDate=new Date(today);
+  endDate.setHours(0,0,0,0);
+  // go back 52 weeks (364 days) from today's weekday-aligned start
+  const startDate=new Date(endDate);
+  startDate.setDate(startDate.getDate()-363);
+  // align to Sunday
+  const dayOfWeek=startDate.getDay();
+  startDate.setDate(startDate.getDate()-dayOfWeek);
+
+  let cells='', months=[];
+  let col=0, prevMonth=-1;
+  let d=new Date(startDate);
+
+  while(d<=endDate){
+    const ds=d.toISOString().slice(0,10);
+    const mins=logMinutes[ds]||0;
+    const isStudied=logDates.has(ds)||streakDates.has(ds);
+    let level=0;
+    if(mins>0){ level=mins<30?1:mins<60?2:mins<120?3:4; }
+    else if(isStudied){ level=1; }
+    const mo=d.getMonth();
+    if(mo!==prevMonth){
+      months.push({month:d.toLocaleDateString('en-IN',{month:'short'}),col});
+      prevMonth=mo;
+    }
+    const title=`${ds}: ${mins>0?mins+' min':'No log'}`;
+    cells+=`<div class="hm-cell hm-${level}" title="${title}" style="grid-column:${col+1};grid-row:${d.getDay()+1}"></div>`;
+    d.setDate(d.getDate()+1);
+    if(d.getDay()===0) col++;
+  }
+  grid.innerHTML=cells;
+
+  let mlH='';
+  months.forEach(m=>{mlH+=`<span style="padding-left:${m.col*14}px;position:absolute;font-size:9px;">${m.month}</span>`;});
+  monthLabels.style.position='relative';monthLabels.style.height='14px';
+  monthLabels.innerHTML=mlH;
+}
+
+
+
+// ── AI CHATBOT ─────────────────────────────────────────────────────────
+
+let aiOpen=false;
+let aiHistory=[];
+
+function aiToggle(){
+  aiOpen=!aiOpen;
+  document.getElementById('aiSidebar').classList.toggle('open',aiOpen);
+  document.getElementById('mainContent').classList.toggle('sidebar-open',aiOpen);
+  const btn=document.getElementById('aiToggleBtn');
+  btn.classList.toggle('active',aiOpen);
+  btn.textContent=aiOpen?'✕':'🤖';
+  if(aiOpen) document.getElementById('aiInput').focus();
+}
+
+function aiQuick(msg){
+  document.getElementById('aiInput').value=msg;
+  aiSend();
+}
+
+function aiAppendMsg(role,text){
+  const container=document.getElementById('aiMessages');
+  const isBot=role==='bot';
+  const div=document.createElement('div');
+  div.className='ai-msg'+(isBot?'':' user');
+  // simple markdown: **bold**, `code`, ```block```
+  let html=text
+    .replace(/```([\s\S]*?)```/g,'<pre>$1</pre>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/\n/g,'<br>');
+  div.innerHTML=`
+    <div class="ai-avatar ${isBot?'bot':'user'}">${isBot?'🤖':'👤'}</div>
+    <div class="ai-bubble ${isBot?'bot':'user'}">${html}</div>`;
+  container.appendChild(div);
+  container.scrollTop=container.scrollHeight;
+}
+
+function aiShowTyping(){
+  const container=document.getElementById('aiMessages');
+  const div=document.createElement('div');
+  div.className='ai-msg';div.id='aiTypingIndicator';
+  div.innerHTML=`<div class="ai-avatar bot">🤖</div><div class="ai-bubble bot"><div class="ai-typing"><span></span><span></span><span></span></div></div>`;
+  container.appendChild(div);
+  container.scrollTop=container.scrollHeight;
+}
+
+function aiRemoveTyping(){
+  const el=document.getElementById('aiTypingIndicator');
+  if(el) el.remove();
+}
+
+async function aiSend(){
+  const input=document.getElementById('aiInput');
+  const msg=input.value.trim();
+  if(!msg) return;
+  input.value='';input.style.height='38px';
+
+  aiAppendMsg('user',msg);
+  aiHistory.push({role:'user',content:msg});
+
+  const sendBtn=document.getElementById('aiSendBtn');
+  sendBtn.disabled=true;
+  aiShowTyping();
+
+  // Build personalised context from user's logged data
+  const wq=logs.filter(l=>l.attempted>0);
+  const avgAcc=wq.length?Math.round(wq.reduce((s,l)=>s+(l.correct/l.attempted*100),0)/wq.length):null;
+  const topicsCount=document.querySelectorAll('.topic.checked').length;
+  const totalJobs=jobs.length;
+  const recentSubjects=[...new Set(logs.slice(0,5).map(l=>l.subject))].join(', ');
+  const ctxNote=`User stats: ${logs.length} study sessions, ${avgAcc!==null?'avg accuracy '+avgAcc+'%, ':''}${topicsCount} syllabus topics completed, ${totalJobs} job applications tracked${recentSubjects?', recently studied: '+recentSubjects:''}.`;
+
+  const systemPrompt=`You are a smart, concise study and career AI assistant embedded inside a personal planner app. The user is preparing for Data Science/ML/IT jobs AND government competitive exams (RBI Assistant, SSC CGL).
+
+Expertise:
+- Data Science, ML, Deep Learning, NLP — concepts, code, papers
+- SQL queries, optimization, database design
+- Python programming, DSA, LeetCode problems
+- System Design (LLD & HLD)
+- Job strategy: resume, LinkedIn, cold outreach, salary negotiation
+- Interview prep and mock Q&A (roleplay as interviewer when asked)
+- Govt exam prep: Quant, English, Reasoning, GA, Banking Awareness
+
+${ctxNote}
+
+Style: Direct, practical, concise. Use bullet points. Wrap code in triple backticks with language tag. Bold key terms with **double asterisks**. Don't over-explain. For mock interviews, stay in character as interviewer until user says stop.`;
+
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: aiHistory.slice(-12)
+      })
+    });
+
+    if(!resp.ok){
+      const errData = await resp.json().catch(()=>({}));
+      throw new Error(errData.error?.message || 'API error ' + resp.status);
+    }
+
+    const data = await resp.json();
+    aiRemoveTyping();
+
+    const reply = data.content?.map(b=>b.text||'').join('') || '';
+    if(reply){
+      aiHistory.push({role:'assistant', content:reply});
+      if(aiHistory.length>24) aiHistory=aiHistory.slice(-24);
+      aiAppendMsg('bot', reply);
+    } else {
+      aiAppendMsg('bot','⚠️ Got an empty response. Please try again.');
+    }
+
+  } catch(e){
+    aiRemoveTyping();
+    // Detailed error to help diagnose
+    const msg = e.message||'';
+    if(msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS')){
+      aiAppendMsg('bot',
+        '**CORS / Network Error**\n\n' +
+        'The Anthropic API cannot be called directly from a browser file due to CORS restrictions.\n\n' +
+        '**To use the AI chatbot:**\n' +
+        '• Open this planner inside **Claude.ai** (as an artifact) — the API call works there\n' +
+        '• Or deploy with a small backend proxy (Node/Python) that forwards requests to Anthropic\n\n' +
+        'All other features (tracker, jobs, heatmap, custom plan) work perfectly offline!'
+      );
+    } else {
+      aiAppendMsg('bot', `**Error:** ${msg||'Something went wrong. Please try again.'}`);
+    }
+  }
+
+  sendBtn.disabled=false;
+  document.getElementById('aiInput').focus();
+}
+
+
+</script>
+
+<!-- AI TOGGLE BUTTON -->
+<button class="ai-toggle-btn" id="aiToggleBtn" onclick="aiToggle()" title="Open AI Assistant">🤖</button>
+
+<!-- AI SIDEBAR -->
+<div class="ai-sidebar" id="aiSidebar">
+  <div class="ai-sidebar-header">
+    <div>
+      <div class="ai-sidebar-title">Study <span>AI</span> Assistant</div>
+      <div class="ai-sidebar-subtitle">DS · ML · SQL · Jobs · Govt Exams</div>
+    </div>
+    <button class="ai-close-btn" onclick="aiToggle()">✕</button>
+  </div>
+
+  <div class="ai-quick-btns">
+    <button class="ai-quick-btn" onclick="aiQuick('Explain overfitting and how to fix it')">Overfitting?</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Give me 3 tricky SQL window function interview questions')">SQL Interview</button>
+    <button class="ai-quick-btn" onclick="aiQuick('How should I write a cold email to a recruiter on LinkedIn for a Data Science role?')">Cold Outreach</button>
+    <button class="ai-quick-btn" onclick="aiQuick('What are the most common ML interview questions at product companies?')">ML Interviews</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Suggest a study plan for RBI Assistant exam in 60 days')">RBI Plan</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Explain the difference between bagging and boosting with examples')">Bagging vs Boosting</button>
+    <button class="ai-quick-btn" onclick="aiQuick('Write a Python function to find duplicate rows in a Pandas DataFrame')">Python Help</button>
+    <button class="ai-quick-btn" onclick="aiQuick('What is the CAP theorem and why does it matter in system design?')">CAP Theorem</button>
+  </div>
+
+  <div class="ai-messages" id="aiMessages">
+    <div class="ai-msg">
+      <div class="ai-avatar bot">🤖</div>
+      <div class="ai-bubble bot">
+        <strong>Hey! I'm your Study AI.</strong><br><br>
+        I can help you with:<br>
+        📊 Data Science &amp; ML concepts<br>
+        🗄️ SQL queries &amp; coding problems<br>
+        💼 Job application strategy &amp; resume tips<br>
+        🎤 Interview prep &amp; mock Q&amp;A<br>
+        🏦 RBI / SSC Government exam prep<br><br>
+        Ask me anything or use the quick buttons above!
+      </div>
+    </div>
+  </div>
+
+  <div class="ai-input-area">
+    <div class="ai-input-row">
+      <textarea class="ai-input" id="aiInput" placeholder="Ask anything — ML, SQL, jobs, exams..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend()}"
+        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
+      <button class="ai-send-btn" id="aiSendBtn" onclick="aiSend()">➤</button>
+    </div>
+    <div class="ai-hint">Enter to send · Shift+Enter for new line</div>
+  </div>
+</div>
+
+</body>
+</html>

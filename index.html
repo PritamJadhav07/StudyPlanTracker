@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Hub — All Planners</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080a0f;--surface:#10131a;--surface2:#181c28;--border:#222638;--accent:#f0c040;--accent2:#7c6af5;--accent3:#3dd9b3;--accent4:#5b8dee;--text:#e8eaf8;--muted:#5a6080;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(124,106,245,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,106,245,0.04) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none;}
+body::after{content:'';position:fixed;top:0;left:50%;transform:translateX(-50%);width:800px;height:400px;
+  background:radial-gradient(ellipse,rgba(124,106,245,.06) 0%,transparent 70%);pointer-events:none;}
+
+.hub{max-width:960px;width:100%;position:relative;z-index:1;}
+
+.hub-header{text-align:center;margin-bottom:60px;}
+.hub-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+.hub-title{font-family:'Playfair Display',serif;font-size:clamp(36px,8vw,72px);font-weight:900;line-height:1;letter-spacing:-2px;margin-bottom:16px;}
+.hub-title .g{color:var(--accent3);}.hub-title .y{color:var(--accent);}.hub-title .p{color:var(--accent2);}
+.hub-sub{color:var(--muted);font-size:14px;max-width:460px;margin:0 auto;line-height:1.7;}
+
+.planner-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:24px;margin-bottom:48px;}
+
+.planner-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:36px;position:relative;overflow:hidden;
+  text-decoration:none;color:var(--text);
+  transition:transform .25s,border-color .25s,box-shadow .25s;
+  display:flex;flex-direction:column;gap:20px;
+}
+.planner-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.4);}
+.planner-card.rbi:hover{border-color:var(--accent);}
+.planner-card.ds:hover{border-color:var(--accent3);}
+.planner-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;border-radius:12px;}
+.planner-card.rbi::before{background:linear-gradient(135deg,rgba(240,192,64,.04),rgba(124,106,245,.04));}
+.planner-card.ds::before{background:linear-gradient(135deg,rgba(61,217,179,.04),rgba(91,141,238,.04));}
+.planner-card:hover::before{opacity:1;}
+
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.card-icon{font-size:40px;line-height:1;}
+.card-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:2px;}
+.badge-rbi{background:rgba(240,192,64,.12);color:var(--accent);border:1px solid rgba(240,192,64,.3);}
+.badge-ds{background:rgba(61,217,179,.12);color:var(--accent3);border:1px solid rgba(61,217,179,.3);}
+
+.card-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;line-height:1.2;}
+.card-title span.rbi-c{color:var(--accent);}
+.card-title span.ds-c{color:var(--accent3);}
+.card-desc{font-size:13px;color:var(--muted);line-height:1.7;}
+
+.card-features{display:flex;flex-direction:column;gap:8px;}
+.feat{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);}
+.feat-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+.card-cta{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:20px;border-top:1px solid var(--border);}
+.cta-text{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;}
+.planner-card.rbi .cta-text{color:var(--accent);}
+.planner-card.ds .cta-text{color:var(--accent3);}
+.cta-arrow{font-size:20px;transition:transform .2s;}
+.planner-card:hover .cta-arrow{transform:translateX(6px);}
+
+.hub-footer{text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1px;}
+.hub-footer span{color:var(--accent2);}
+
+/* Decorative accent lines */
+.planner-card.rbi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:12px 12px 0 0;}
+.planner-card.ds::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent3),var(--accent4));border-radius:12px 12px 0 0;}
+
+@media(max-width:500px){.planner-grid{grid-template-columns:1fr;}.planner-card{padding:24px;}}
+</style>
+</head>
+<body>
+<div class="hub">
+  <div class="hub-header">
+    <div class="hub-label">Personal Study Hub</div>
+    <h1 class="hub-title">Choose Your <span class="g">Plan</span></h1>
+    <p class="hub-sub">Two dedicated planners — one for competitive exams, one for technical skills. Each with timers, trackers, analysis and custom day planning.</p>
+  </div>
+
+  <div class="planner-grid">
+    <!-- RBI & SSC Card -->
+    <a href="study_plan_tracker.html" class="planner-card rbi">
+      <div class="card-top">
+        <div class="card-icon">🏦</div>
+        <span class="card-badge badge-rbi">Competitive Exams</span>
+      </div>
+      <div>
+        <div class="card-title">RBI Assistant &amp; <span class="rbi-c">SSC CGL</span></div>
+        <div class="card-desc" style="margin-top:8px;">Structured exam prep for government banking &amp; staff selection exams. 4–5 hrs/day, Intermediate level.</div>
+      </div>
+      <div class="card-features">
+        <div class="feat"><div class="feat-dot" style="background:var(--accent)"></div>7-day timetable with 5 sessions/day</div>
+        <div class="feat"><div class="feat-dot" style="background:#f06060"></div>English · Quant · Reasoning · GA · Computer</div>
+        <div class="feat"><div class="feat-dot" style="background:#7c6af5"></div>Daily tracker with accuracy & confidence logs</div>
+        <div class="feat"><div class="feat-dot" style="background:var(--accent3)"></div>Syllabus checklist with priority badges</div>
+        <div class="feat"><div class="feat-dot" style="background:var(--accent)"></div>✏️ Custom daily study plan builder</div>
+        <div class="feat"><div class="feat-dot" style="background:#f08040"></div>Study streak calendar + analysis dashboard</div>
+      </div>
+      <div class="card-cta">
+        <span class="cta-text">Open Planner</span>
+        <span class="cta-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- DS & IT Card -->
+    <a href="ds_planner.html" class="planner-card ds">
+      <div class="card-top">
+        <div class="card-icon">🤖</div>
+        <span class="card-badge badge-ds">Technical Studies</span>
+      </div>
+      <div>
+        <div class="card-title">Data Science &amp; <span class="ds-c">IT</span> Planner</div>
+        <div class="card-desc" style="margin-top:8px;">Self-paced technical learning roadmap for Data Science, ML, SQL, DSA, Cloud &amp; more. Ongoing &amp; project-driven.</div>
+      </div>
+      <div class="card-features">
+        <div class="feat"><div class="feat-dot" style="background:var(--accent3)"></div>7-day schedule: Python · ML · SQL · DL · Tools</div>
+        <div class="feat"><div class="feat-dot" style="background:var(--accent4)"></div>6-phase learning roadmap (Foundation → Job Ready)</div>
+        <div class="feat"><div class="feat-dot" style="background:#c084fc"></div>Session tracker: problems solved, understanding level</div>
+        <div class="feat"><div class="feat-dot" style="background:var(--accent3)"></div>Full syllabus: 7 domains, 60+ topics with priorities</div>
+        <div class="feat"><div class="feat-dot" style="background:var(--accent)"></div>✏️ Custom daily study plan builder</div>
+        <div class="feat"><div class="feat-dot" style="background:var(--accent4)"></div>Study streak calendar + performance analysis</div>
+      </div>
+      <div class="card-cta">
+        <span class="cta-text">Open Planner</span>
+        <span class="cta-arrow">→</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="hub-footer">Both planners · <span>⏱ Study Timer</span> · Auto-save in browser · No login required</div>
+</div>
+</body>
+</html>
